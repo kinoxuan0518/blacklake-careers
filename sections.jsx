@@ -631,7 +631,7 @@ function Jobs({ onOpen }) {
             <div className="eyebrow"><span className="dot" /><span className="num">03</span><span>在招职位</span></div>
           </div>
           <div>
-            <LiquidHeading className="h-1">找到下一个<em className="green italic">真正对的人</em></LiquidHeading>
+            <LiquidHeading className="h-1">找到下一个<em className="green italic">同行者</em></LiquidHeading>
           </div>
         </div>
 
