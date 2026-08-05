@@ -384,8 +384,7 @@ function Hero({ onPrimary, onSecondary }) {
 
           <h1 className="h-hero hero-title" ref={titleRef}>
             <span className="line"><span>{'代码的终极意义'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-            <span className="line"><span>{'是改变'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'真实'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
-            <span className="line"><span><em>{'世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em>{'。'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+            <span className="line"><span>{'是改变'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'真实'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em>{'世界。'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
           </h1>
 
           <p className="hero-sub reveal">
