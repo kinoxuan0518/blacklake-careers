@@ -1,13 +1,6 @@
 /* global window */
 // ============ Heihu Careers v2 · Data (EN) ============
 
-const VALUES = [
-  { idx: "01", title: "Intelligent Humility", meta: "In factories, the wisest people often wear work uniforms. We listen first, ask first, learn first — then speak." },
-  { idx: "02", title: "Pragmatic Optimism", meta: "We believe Chinese manufacturing deserves better tools. But belief isn't a slogan — it's an agent running on a real production line, an on-site debug session, an iteration after overtime." },
-  { idx: "03", title: "Grow on the Factory Floor", meta: "We embed in workshops, production lines, and beside engineers' screens. Real insight comes from the factory floor, not the boardroom." },
-  { idx: "04", title: "Make Complexity Simple", meta: "Manufacturing is complex. Our job is to make it so a frontline worker gets it at a glance, and a manager instantly sees what's happening." },
-];
-
 const JOBS = [
   { id: "ai-001", title: "Industrial LLM Application Engineer", team: "AI · Industrial LLM", category: "AI · ML", loc: "Shanghai", type: "Full-time", level: "P6-P7",
     desc: "Train and fine-tune industry-specific foundation models on real factory data — teaching models to truly read drawings, process flows, documents, and the language of the shop floor.",
@@ -50,32 +43,6 @@ const JOBS = [
 const CATEGORIES = ["All", "AI · ML", "Product", "Engineering", "Solutions", "Delivery", "Internship"];
 const LOCATIONS = ["All Cities", "Shanghai", "Shenzhen", "Guangzhou", "Suzhou / Changzhou", "Singapore", "Remote"];
 
-const STORIES = [
-  { name: "Icy", fullName: "Icy · Employee No.3", role: "Commercial · 9 years", quote: "It was the mission that first attracted me. Later we'd have heated debates about fold-ear-root, get excited about cosplay at the annual party. Candid, simple, open, fun — I can't find a reason to leave.", team: "Commercial" },
-  { name: "Shaw", fullName: "Shaw · Head of Marketing", role: "Brand · 8 years", quote: "My resume was 4,000 words, red-bolded, and got thrown in the trash. Then it got fished back out. The recruiter said: this person is either a genius or genuinely eccentric.", team: "Marketing" },
-  { name: "Leo", fullName: "Leo · South China AM", role: "Field Sales · 4 years", quote: "Getting chased out by security, getting scolded by a factory boss — totally normal. Freezing rain, broken car AC, soaked through, still out there hustling — all for the win.", team: "Sales" },
-  { name: "Jenny", fullName: "Jenny · AI Product Lead", role: "AI Manufacturing · 2 years", quote: "To explore AI-driven flexible quick-turn, I gave up my Shanghai apartment, shipped my Tesla to Dongguan, and embedded in the workshop. When rush orders came, I sat on the line packing with workers.", team: "AI Manufacturing" },
-  { name: "Peter", fullName: "Peter · Data Scientist", role: "Algorithms · 3 years", quote: "The order-splitting agent hit 92% accuracy — about 8 out of 100 steps go wrong. A veteran worker spends 15 minutes correcting, instead of 2-3 hours before. Those corrections get recorded, forming a second round of learning.", team: "AI" },
-  { name: "Kevin", fullName: "Kevin · Overseas Delivery", role: "Mexico Project · 1 year", quote: "Stationed in Puebla, Mexico — no Chinese food for a month, too dangerous to go out at night. The warehouse manager lady said: because of Blacklake's product, she walks less in the warehouse now. She's gained weight.", team: "Overseas" },
-];
-
-const PERKS = [
-  { idx: "01", t: "Field Subsidies & Travel", d: "Full reimbursement for factory trips; extra workshop allowances. The intelligence gained is never something we skimp on." },
-  { idx: "02", t: "AI Budget", d: "No fixed cap. Any useful AI tool is reimbursable — we think this investment always pays off." },
-  { idx: "03", t: "Equity & Long-term", d: "We believe in doing something hard and right for the long run." },
-  { idx: "04", t: "Health & Time Off", d: "Full social insurance + supplemental medical; annual check-up; family coverage; PTO increasing annually; extra benefit leave." },
-  { idx: "05", t: "Equipment", d: "Mac of your choice, ultrawide monitors. We'll set up your productivity tools properly." },
-  { idx: "06", t: "AI Bonus & Community", d: "Bi-monthly cash bonus — help the team, get rewarded. Internal AI sharing culture with occasional Silicon Valley guest visits." },
-];
-
-const PLACES = [
-  { label: "Shanghai · Changning, 333 Wuyi Rd", n: "01" },
-  { label: "Shenzhen · Nanshan", n: "02" },
-  { label: "Suzhou · Industrial Park", n: "03" },
-  { label: "On-site · Customer Factories", n: "04" },
-  { label: "Mexico · Puebla", n: "05" },
-];
-
 // ── Hero Stats ──
 const HERO_STATS = [
   { k: "Factories Served", v: "40000", unit: "+", countUp: true },
@@ -84,18 +51,4 @@ const HERO_STATS = [
   { k: "Founded", v: "2016", unit: "", countUp: false },
 ];
 
-// ── Client Logos ──
-const CLIENTS = [
-  "Tesla Supply Chain", "GAC Group", "Nongfu Spring", "China Resources", "Mixue",
-  "Mengniu Dairy", "Crayon Shin-chan Foods", "Food & Beverage", "Auto Parts", "Precision Electronics", "Home Appliances", "FMCG",
-];
-
-const FAQS = [
-  { q: "What type of customers does Blacklake serve?", a: "Discrete and process manufacturing factories — spanning automotive, new energy, food & beverage, precision electronics, chemicals, and more. Our clients include Tesla's supply chain, GAC Group, Nongfu Spring, and Mixue, as well as tens of thousands of SME manufacturers with 20-100 employees." },
-  { q: "How is Blacklake different from other industrial software companies?", a: "We're #1 in China's SaaS MES market (52.7% share), and one of the few companies genuinely deploying AI Agents in real manufacturing scenarios." },
-  { q: "Do I need to visit factories often?", a: "Depends on the role. Product, Solutions, and Customer Success involve significant on-site time — we've had 'go to the factory' in our DNA since day one. R&D teams arrange quarterly factory visits as well." },
-  { q: "What does the interview process look like?", a: "Typically: Resume → Phone screen → 2-3 technical/business rounds → Leader round. We aim to complete the entire process within 1-2 weeks." },
-  { q: "What if I don't see a role that fits?", a: "If none of our current openings fit — you can create your own role." },
-];
-
-Object.assign(window, { VALUES, JOBS, CATEGORIES, LOCATIONS, STORIES, PERKS, PLACES, FAQS, HERO_STATS, CLIENTS });
+Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS });

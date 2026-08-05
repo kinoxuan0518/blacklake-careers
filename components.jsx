@@ -112,19 +112,6 @@ function ScrollBar() {
   return <div className="scroll-bar"><i style={{ width: `${p}%` }} /></div>;
 }
 
-// ── 头像 SVG ──
-function AvatarSVG({ seed = 1 }) {
-  const hues = [155, 42, 22, 205, 285, 95];
-  const h = hues[seed % hues.length];
-  return (
-    <svg viewBox="0 0 40 40">
-      <rect width="40" height="40" fill={`hsl(${h} 25% 18%)`} />
-      <circle cx="20" cy="16" r="7" fill={`hsl(${h} 35% 45%)`} />
-      <path d={`M5 40 Q20 ${26 + (seed % 4)} 35 40 Z`} fill={`hsl(${h} 35% 45%)`} />
-    </svg>
-  );
-}
-
 // ── 抽屉：职位详情 ──
 function JobDrawer({ job, onClose }) {
   useEffect(() => {
@@ -222,42 +209,6 @@ function useTiltEffect(ref) {
     grid.addEventListener("mousemove", onMove);
     grid.addEventListener("mouseout", onOut);
     return () => { grid.removeEventListener("mousemove", onMove); grid.removeEventListener("mouseout", onOut); };
-  }, []);
-}
-
-// ── C. Perk ripple origin tracker + 3D tilt ──
-function usePerkRipple(ref) {
-  useEffect(() => {
-    const grid = ref.current;
-    if (!grid) return;
-    let rafId;
-    const onMove = e => {
-      const card = e.target.closest(".perk");
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      const rx = (e.clientX - r.left) / r.width;
-      const ry = (e.clientY - r.top)  / r.height;
-      card.style.setProperty("--ox", `${(rx * 100).toFixed(0)}%`);
-      card.style.setProperty("--oy", `${(ry * 100).toFixed(0)}%`);
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const mx = rx - 0.5, my = ry - 0.5;
-        card.style.transform = `perspective(900px) rotateY(${(mx * 9).toFixed(2)}deg) rotateX(${(-my * 6).toFixed(2)}deg) translateZ(8px)`;
-      });
-    };
-    const onOut = e => {
-      const card = e.target.closest(".perk");
-      if (!card || card.contains(e.relatedTarget)) return;
-      cancelAnimationFrame(rafId);
-      card.style.transform = '';
-    };
-    grid.addEventListener("mousemove", onMove);
-    grid.addEventListener("mouseout", onOut);
-    return () => {
-      cancelAnimationFrame(rafId);
-      grid.removeEventListener("mousemove", onMove);
-      grid.removeEventListener("mouseout", onOut);
-    };
   }, []);
 }
 
@@ -559,4 +510,4 @@ function OdometerStat({ value, suffix, label, duration = 1900, delay = 0 }) {
   );
 }
 
-Object.assign(window, { Nav, Arrow, ScrollBar, AvatarSVG, JobDrawer, useReveal, useCountUp, OdometerStat, LiquidHeading, CursorGlow, useTiltEffect, usePerkRipple });
+Object.assign(window, { Nav, Arrow, ScrollBar, JobDrawer, useReveal, useCountUp, OdometerStat, LiquidHeading, CursorGlow, useTiltEffect });

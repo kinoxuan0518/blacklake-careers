@@ -1,4 +1,4 @@
-/* global React, window, VALUES, JOBS, CATEGORIES, LOCATIONS, STORIES, PERKS, PLACES, FAQS, HERO_STATS, CLIENTS, Arrow, AvatarSVG, useCountUp */
+/* global React, window, JOBS, CATEGORIES, LOCATIONS, HERO_STATS, Arrow, useCountUp */
 
 const { useState: useS, useMemo: useM, useRef: useR, useEffect: useE } = React;
 
@@ -438,22 +438,6 @@ function About() {
   );
 }
 
-// ═══════════════════════════════ Clients Strip ═══════════════════════════════
-function ClientsStrip() {
-  const items = CLIENTS.concat(CLIENTS);
-  return (
-    <div className="clients-strip">
-      <div className="clients-track">
-        {items.map((c, i) => (
-          <React.Fragment key={i}>
-            <span className="client-name">{c}</span>
-            {i < items.length - 1 && <span className="client-sep">·</span>}
-          </React.Fragment>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── BigMark scroll-reveal ───────────────────────────────────────────────────
 function BigMarkReveal() {
@@ -490,52 +474,7 @@ function BigMarkReveal() {
   );
 }
 
-// ═══════════════════════════════ WhyJoin ═══════════════════════════════
-function WhyJoin() {
-  return (
-    <section className="section" id="why">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">02</span><span>Why Join Blacklake</span></div>
-          </div>
-          <div>
-            <LiquidHeading className="h-1">We hope to <em className="green italic">walk this road with you</em></LiquidHeading>
-            <p className="sub">Not slogans on a wall — these are our hiring filter, our decision framework, and the answer when customers ask "why do you do it this way."</p>
-          </div>
-        </div>
 
-        <div className="values reveal d-1">
-          {VALUES.map(v => (
-            <div key={v.idx} className="val">
-              <div className="val-idx">/ {v.idx}</div>
-              <div className="val-title">{v.title}</div>
-              <div className="val-meta">{v.meta}</div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginTop: 80 }}>
-          <BigMarkReveal />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── JobSparkline ─────────────────────────────────────────────────────────────
-function JobSparkline({ job }) {
-  const rand = _seededRand(_jobHash(job.id));
-  const pts = Array.from({ length: 8 }, rand);
-  const SW = 56, SH = 22;
-  const step = SW / (pts.length - 1);
-  const d = pts.map((v, i) => `${i === 0 ? "M" : "L"}${(i * step).toFixed(1)},${(SH - v * SH * 0.75 - 2).toFixed(1)}`).join(" ");
-  return (
-    <svg width={SW} height={SH} viewBox={`0 0 ${SW} ${SH}`} className="job-sparkline">
-      <path d={d} fill="none" stroke="var(--green)" strokeWidth="1.2" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 // ═══════════════════════════════ Jobs ═══════════════════════════════
 function JobRow({ j, idx, onOpen }) {
@@ -658,272 +597,13 @@ function Jobs({ onOpen }) {
   );
 }
 
-// ═══════════════════════════════ Stories ═══════════════════════════════
-const STORY_COLORS_EN = {
-  'Commercial':      '#F1783C',
-  'Marketing':       '#3794E9',
-  'Sales':           '#EE5B54',
-  'AI Manufacturing':'#02B980',
-  'AI':              '#00B9BE',
-  'Overseas':        '#D4A857',
-};
 
-const STORY_HL_EN = [
-  ["I can't find a reason to leave"],
-  ["genuinely eccentric"],
-  ["soaked through, still out there hustling"],
-  ["gave up my Shanghai apartment", "packing with workers"],
-  ["forming a second round of learning"],
-  ["she's gained weight"],
-];
 
-function buildQuoteSpans(text, hls) {
-  const n = text.length;
-  const inHL = new Array(n).fill(-1);
-  (hls || []).forEach((phrase, pi) => {
-    const idx = text.indexOf(phrase);
-    if (idx !== -1) for (let k = idx; k < idx + phrase.length; k++) inHL[k] = pi;
-  });
 
-  const result = [];
-  let ci = 0;
-  let i = 0;
-  while (i < n) {
-    if (inHL[i] !== -1) {
-      const hlId = inHL[i];
-      let j = i;
-      while (j < n && inHL[j] === hlId) j++;
-      const hlDelay = (ci * 28 + 420) + 'ms';
-      result.push(
-        <span key={`hl-${i}`} className="hl-phrase" style={{ '--hl-delay': hlDelay }}>
-          {text.slice(i, j).split('').map((c, k) => (
-            <span key={k} className="story-quote-char" style={{ animationDelay: `${(ci + k) * 28}ms` }}>{c}</span>
-          ))}
-        </span>
-      );
-      ci += j - i; i = j;
-    } else {
-      result.push(
-        <span key={`c-${i}`} className="story-quote-char" style={{ animationDelay: `${ci * 28}ms` }}>{text[i]}</span>
-      );
-      ci++; i++;
-    }
-  }
-  return result;
-}
 
-function StoryCard({ s, storyIdx, color }) {
-  const cardRef = useR(null);
-  const [revealed, setRevealed] = useS(false);
 
-  useE(() => {
-    const el = cardRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setRevealed(true); io.disconnect(); }
-    }, { threshold: 0.12 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
-  const spans = buildQuoteSpans(s.quote, STORY_HL_EN[storyIdx]);
 
-  return (
-    <article ref={cardRef} className={`story${revealed ? ' revealed' : ''}`}>
-      <span className="story-tag" style={{ color, borderColor: color + '55', background: color + '18' }}>{s.team}</span>
-      <blockquote className="story-quote">"{spans}"</blockquote>
-      <div className="story-foot">
-        <div className="story-avatar"><AvatarSVG seed={storyIdx + 1} /></div>
-        <div>
-          <div className="story-name">{s.fullName || s.name}</div>
-          <div className="story-role">{s.role}</div>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function Stories() {
-  return (
-    <section className="stories-section section" id="stories">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">04</span><span>From the Team</span></div>
-          </div>
-          <div>
-            <LiquidHeading className="h-1">Not slogans — <em className="green italic">real colleagues</em></LiquidHeading>
-            <p className="sub">Six first-person accounts from different teams. No polish, kept as close to the original as possible.</p>
-          </div>
-        </div>
-        <div className="stories">
-          {STORIES.map((s, i) => (
-            <StoryCard key={i} s={s} storyIdx={i} color={STORY_COLORS_EN[s.team] || 'var(--green)'} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════ Places · Contact Sheet ═══════════════════════════════
-function PlacesSection() {
-  const [photoFull, setPhotoFull] = useS(null);
-
-  const photos = [
-    { src: 'assets/office-1.jpg', cap: '333 Wuyi Road' },
-    { src: 'assets/office-2.jpg', cap: 'Campus Courtyard' },
-    { src: 'assets/office-3.jpg', cap: 'Covered Walkway' },
-    { src: 'assets/office-4.jpg', cap: 'Aerial View' },
-  ];
-
-  const cities = [
-    { name: 'Shanghai', badge: 'HQ', detail: "31°12'N · 121°28'E" },
-  ];
-
-  useE(() => {
-    const h = e => e.key === 'Escape' && setPhotoFull(null);
-    window.addEventListener('keydown', h);
-    return () => window.removeEventListener('keydown', h);
-  }, []);
-
-  return (
-    <section className="section section-places" id="life">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">05</span><span>Our Footprint</span></div>
-          </div>
-          <div>
-            <LiquidHeading className="h-1">From Shanghai, <em className="green italic">rooted across Asia-Pacific</em></LiquidHeading>
-            <p className="sub">Headquartered in Shanghai, operating across 30+ provinces in China — with a regional HQ in Singapore and growing presence in Indonesia and Vietnam.</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="office-strip reveal d-1">
-        {photos.map((p, i) => (
-          <button key={i} className="office-frame" onClick={() => setPhotoFull(p.src)}>
-            <img src={p.src} alt={p.cap} className="office-frame-img" loading="lazy" />
-            <span className="office-frame-idx">0{i + 1}</span>
-            <div className="office-frame-foot">
-              <span className="office-frame-loc">Shanghai · HQ</span>
-              <span className="office-frame-cap">{p.cap}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div className="wrap">
-        <div className="office-cities reveal d-2">
-          {cities.map((c, i) => (
-            <div key={i} className="office-city">
-              <span className="loc-dot" />
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span className="office-city-name">{c.name}</span>
-                  {c.badge && <span className="office-city-badge">{c.badge}</span>}
-                </div>
-                {c.detail && <div className="office-city-detail">{c.detail}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {photoFull && (
-        <div className="photo-lightbox" onClick={() => setPhotoFull(null)}>
-          <img src={photoFull} alt="Office" className="photo-lightbox-img" />
-          <button className="photo-lightbox-close" onClick={e => { e.stopPropagation(); setPhotoFull(null); }}>
-            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.5" /></svg>
-          </button>
-        </div>
-      )}
-    </section>
-  );
-}
-
-// ═══════════════════════════════ Perks ═══════════════════════════════
-function PerksSection() {
-  const gridRef = useR(null);
-  usePerkRipple(gridRef);
-  return (
-    <section className="section" id="perks">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">06</span><span>Perks & Benefits</span></div>
-          </div>
-          <div>
-            <LiquidHeading className="h-1">Getting the <em className="green italic">fundamentals</em> right matters more than gimmicks</LiquidHeading>
-            <p className="sub">No massage chairs, no free beer taps. Here's what we think actually matters.</p>
-          </div>
-        </div>
-
-        <div className="perks reveal d-1" ref={gridRef}>
-          {PERKS.map((p) => (
-            <div key={p.idx} className="perk">
-              <div className="perk-idx">/ {p.idx}</div>
-              <div className="perk-t">{p.t}</div>
-              <div className="perk-d">{p.d}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════ FAQ ═══════════════════════════════
-function Process() {
-  return (
-    <section className="section" id="process">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">07</span><span>FAQ</span></div>
-          </div>
-          <div>
-            <LiquidHeading className="h-1">Things you might want to <em className="green italic">ask us first</em></LiquidHeading>
-          </div>
-        </div>
-
-        <div className="reveal d-1">
-          {FAQS.map((f, i) => (
-            <FAQItem key={i} q={f.q} a={f.a} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FAQItem({ q, a }) {
-  const [open, setOpen] = useS(false);
-  const innerRef = useR(null);
-  const [h, setH] = useS(0);
-  useE(() => {
-    if (!innerRef.current) return;
-    const ro = new ResizeObserver(() => setH(innerRef.current.scrollHeight));
-    ro.observe(innerRef.current);
-    return () => ro.disconnect();
-  }, []);
-  return (
-    <div className="faq-item">
-      <button className="faq-btn" onClick={() => setOpen(o => !o)}>
-        <span className="faq-q">{q}</span>
-        <span className="faq-icon" style={{ transform: open ? "rotate(45deg)" : "none", transition: "transform .3s var(--ease)" }}>
-          <svg width="10" height="10" viewBox="0 0 10 10">
-            <path d="M5 1V9M1 5H9" stroke="currentColor" strokeWidth="1.3" />
-          </svg>
-        </span>
-      </button>
-      <div className="faq-body" style={{ height: open ? h : 0 }}>
-        <div ref={innerRef} style={{ paddingBottom: 20 }}><p>{a}</p></div>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════ CTA ═══════════════════════════════
 function CTA({ onApply }) {
@@ -1252,4 +932,4 @@ function OEEGame() {
   );
 }
 
-Object.assign(window, { Hero, About, ClientsStrip, WhyJoin, Jobs, Stories, PlacesSection, PerksSection, Process, CTA, Footer, Manifesto, OEEGame });
+Object.assign(window, { Hero, About, Jobs, CTA, Footer, Manifesto, OEEGame });
