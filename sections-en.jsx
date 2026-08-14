@@ -359,6 +359,10 @@ function Hero({ onPrimary, onSecondary }) {
   return (
     <section className="hero noise" id="top">
       <div className="glow-top" />
+      <div className="hero-photo-bg" aria-hidden="true">
+        <img src="assets/photos/hero-plant.png" alt="" />
+        <div className="hero-photo-veil" />
+      </div>
 
       <div className="wrap hero-wrap-grid">
         <div>
@@ -425,6 +429,10 @@ function About() {
                 China has millions of small and medium factories. They are the capillaries of manufacturing — supporting countless jobs and the last mile of supply chains — yet they are almost entirely silent.
               </div>
             </div>
+            <figure className="about-photo">
+              <img src="assets/photos/about-team.jpg" alt="Blacklake team on a customer factory floor" loading="lazy" />
+              <figcaption>On-site at a customer factory · real photo</figcaption>
+            </figure>
           </aside>
 
           <div>
@@ -617,11 +625,14 @@ function CTA({ onApply }) {
             </div>
             <h2>Then <em className="green italic">create</em><br />your own role.</h2>
             <p className="cta-sub">We believe the right person matters more than the right opening.<br/>If nothing above moves you, tell us what you want to build — send a resume, a portfolio, a paragraph.</p>
+            <div className="cta-actions" style={{ marginTop: 32 }}>
+              <a className="btn btn-ghost" href="mailto:careers@blacklake.cn?subject=I want to create a role at Blacklake">Write to us</a>
+              <button className="btn" onClick={onApply}>Back to roles <Arrow /></button>
+            </div>
           </div>
-          <div className="cta-actions">
-            <a className="btn btn-ghost" href="mailto:careers@blacklake.cn?subject=I want to create a role at Blacklake">Write to us</a>
-            <button className="btn" onClick={onApply}>Back to roles <Arrow /></button>
-          </div>
+          <figure className="cta-photo" aria-hidden="true">
+            <img src="assets/photos/cta-material.jpg" alt="" loading="lazy" />
+          </figure>
         </div>
       </div>
     </section>
@@ -641,6 +652,10 @@ function Manifesto() {
         </div>
         <div style={{ marginTop: 32 }}>
           <BigMarkReveal />
+          <figure className="bigmark-photo">
+            <img src="assets/photos/why-material.jpg" alt="Production-line material close-up at a customer factory" loading="lazy" />
+            <figcaption>Real workshops · real materials</figcaption>
+          </figure>
         </div>
       </div>
     </section>

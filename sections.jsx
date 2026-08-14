@@ -377,6 +377,10 @@ function Hero({ onPrimary, onSecondary }) {
   return (
     <section className="hero noise" id="top">
       <div className="glow-top" />
+      <div className="hero-photo-bg" aria-hidden="true">
+        <img src="assets/photos/hero-plant.png" alt="" />
+        <div className="hero-photo-veil" />
+      </div>
 
 
       <div className="wrap hero-wrap-grid">
@@ -438,6 +442,10 @@ function About() {
                 中国有数百万中小工厂。它们是制造业的毛细血管，承载着无数就业和产业链的末端环节——但它们几乎是沉默的。
               </div>
             </div>
+            <figure className="about-photo">
+              <img src="assets/photos/about-team.jpg" alt="黑湖团队在客户工厂现场" loading="lazy" />
+              <figcaption>客户工厂现场 · 真实拍摄</figcaption>
+            </figure>
           </aside>
 
           <div>
@@ -617,11 +625,14 @@ function CTA({ onApply }) {
             </div>
             <h2>那就 <em className="green italic">自己创造</em><br />一个岗位。</h2>
             <p className="cta-sub">我们相信，对的人比对的岗位更重要。<br/>如果上面的列表里没有让你心动的，告诉我们你想做什么——把简历、作品、一段话砸过来。</p>
+            <div className="cta-actions" style={{ marginTop: 32 }}>
+              <a className="btn btn-ghost" href="mailto:careers@blacklake.cn?subject=我想为黑湖创造一个岗位">写信告诉我们</a>
+              <button className="btn" onClick={onApply}>再看一眼职位 <Arrow /></button>
+            </div>
           </div>
-          <div className="cta-actions">
-            <a className="btn btn-ghost" href="mailto:careers@blacklake.cn?subject=我想为黑湖创造一个岗位">写信告诉我们</a>
-            <button className="btn" onClick={onApply}>再看一眼职位 <Arrow /></button>
-          </div>
+          <figure className="cta-photo" aria-hidden="true">
+            <img src="assets/photos/cta-material.jpg" alt="" loading="lazy" />
+          </figure>
         </div>
       </div>
     </section>
@@ -949,6 +960,10 @@ function Manifesto() {
         </div>
         <div style={{ marginTop: 32 }}>
           <BigMarkReveal />
+          <figure className="bigmark-photo">
+            <img src="assets/photos/why-material.jpg" alt="客户工厂产线材料特写" loading="lazy" />
+            <figcaption>真实的车间 · 真实的材料</figcaption>
+          </figure>
         </div>
       </div>
     </section>

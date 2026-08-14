@@ -308,6 +308,26 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 }
 .hero .glow-top{top:-120px;opacity:.4}
 
+/* 真实客户工厂照片层 */
+.hero-photo-bg{
+  position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+}
+.hero-photo-bg img{
+  position:absolute;right:-4%;top:50%;transform:translateY(-50%);
+  width:min(56vw,860px);height:auto;opacity:.5;
+  filter:grayscale(.55) contrast(1.05) brightness(.8);
+  mask-image:radial-gradient(ellipse 75% 90% at 70% 50%,rgba(0,0,0,.95) 30%,transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse 75% 90% at 70% 50%,rgba(0,0,0,.95) 30%,transparent 78%);
+}
+.hero-photo-veil{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(6,8,8,.92) 0%,rgba(6,8,8,.55) 42%,rgba(6,8,8,.15) 100%);
+}
+@media(max-width:900px){
+  .hero-photo-bg img{width:110vw;right:-10%;top:auto;bottom:0;transform:none;opacity:.28}
+  .hero-photo-veil{background:linear-gradient(180deg,rgba(6,8,8,.88) 0%,rgba(6,8,8,.45) 60%,rgba(6,8,8,.25) 100%)}
+}
+
 .hero-kicker{
   display:flex;align-items:center;gap:14px;
   font-family:var(--mono);font-size:11px;letter-spacing:0.14em;
@@ -409,6 +429,19 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 .corner::before{top:-1px;left:-1px;border-top:1px solid var(--green);border-left:1px solid var(--green)}
 .corner::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--green);border-right:1px solid var(--green)}
 
+/* About 区：真实客户工厂照片 */
+.about-photo{
+  margin:28px 0 0;padding:0;
+  border:1px solid var(--line-2);border-radius:var(--r-sm);overflow:hidden;
+  background:rgba(17,17,19,0.6);
+}
+.about-photo img{display:block;width:100%;height:auto;object-fit:cover}
+.about-photo figcaption{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
+  color:var(--fg-4);text-transform:uppercase;padding:10px 14px;
+  border-top:1px solid var(--line-2);
+}
+
 /* 数据条 */
 .tick-row{
   display:flex;align-items:end;gap:0;height:48px;margin-top:28px;
@@ -484,6 +517,19 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 .bm-word.bm-lit{color:var(--fg);}
 .bm-word.bm-outline.bm-lit{-webkit-text-stroke:1px var(--fg-3);color:transparent;}
 .bm-word.bm-em.bm-lit{color:var(--green);text-shadow:0 0 40px var(--green-glow);}
+
+/* BigMark 旁的真实材料竖图 */
+.bigmark-photo{
+  margin:40px 0 0;padding:0;max-width:460px;
+  border:1px solid var(--line-2);border-radius:var(--r-sm);overflow:hidden;
+  background:rgba(17,17,19,0.6);
+}
+.bigmark-photo img{display:block;width:100%;height:auto;object-fit:cover}
+.bigmark-photo figcaption{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.1em;
+  color:var(--fg-4);text-transform:uppercase;padding:10px 14px;
+  border-top:1px solid var(--line-2);
+}
 
 /* ============ 岗位列表 ============ */
 .jobs-head{display:flex;align-items:end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:32px}
@@ -829,7 +875,21 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 }
 .cta-sub{color:var(--fg-3);margin:20px 0 0;max-width:44ch;line-height:1.7}
 .cta-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
-@media(max-width:900px){.cta-block{grid-template-columns:1fr}.cta-actions{justify-content:flex-start}}
+/* CTA 蓝灰材质照片（右侧装饰） */
+.cta-photo{
+  margin:0;padding:0;position:relative;align-self:stretch;min-height:200px;
+  border:1px solid var(--line-2);border-radius:var(--r-sm);overflow:hidden;
+}
+.cta-photo img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:grayscale(.4) contrast(1.02) brightness(.9);
+  opacity:.75;
+}
+.cta-photo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(6,8,8,0.05) 40%,rgba(6,8,8,.8) 100%);
+}
+@media(max-width:900px){.cta-block{grid-template-columns:1fr}.cta-actions{justify-content:flex-start}.cta-photo{min-height:0;order:-1;max-height:220px}}
 
 /* ============ 页脚 ============ */
 .foot{border-top:1px solid var(--line);margin-top:80px;padding:56px 0 40px;font-size:13px;color:var(--fg-3)}
