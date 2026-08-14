@@ -40,7 +40,8 @@ const JOBS = [
     req: ["Available 4+ days/week for 3+ months", "Solid ML / NLP / CV fundamentals, with project or paper experience", "Curious about real-world industrial AI"] },
 ];
 
-const CATEGORIES = ["All", "AI · ML", "Product", "Engineering", "Solutions", "Delivery", "Internship"];
+const CATEGORIES = ["AI · ML", "Product", "Engineering", "Solutions", "Delivery", "Internship"];
+const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: 替换为真实飞书招聘官网地址
 const LOCATIONS = ["All Cities", "Shanghai", "Shenzhen", "Guangzhou", "Suzhou / Changzhou", "Singapore", "Remote"];
 
 // ── Hero Stats ──
@@ -51,4 +52,4 @@ const HERO_STATS = [
   { k: "Founded", v: "2016", unit: "", countUp: false },
 ];
 
-Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS });
+Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS, RECRUIT_URL });

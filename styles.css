@@ -40,9 +40,9 @@
   --glass:       rgba(9,9,11,0.72);
   --glass-border:rgba(255,255,255,0.08);
 
-  /* ── 字体（VI 规范：思源黑体 / Noto Sans SC） ── */
-  --serif:  "Fraunces", "Noto Serif SC", "Songti SC", serif;
-  --sans:   "Noto Sans SC", -apple-system, "PingFang SC", sans-serif;
+  /* ── 字体（Kimi×Linear 方向：Inter 无衬线统一） ── */
+  --serif:  "Inter", "Noto Sans SC", -apple-system, sans-serif;
+  --sans:   "Inter", "Noto Sans SC", -apple-system, "PingFang SC", sans-serif;
   --mono:   "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* ── 排版 ── */
@@ -83,34 +83,13 @@ body{
   line-height:1.72;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
-  cursor:none;
 }
-a,button{cursor:none}
+a,button{cursor:pointer}
 a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;background:none;border:0;cursor:none;padding:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0}
 
-/* ============ Fog + Grid Background ============ */
-.fog-cursor-ring{
-  position:fixed;width:28px;height:28px;
-  border:1px solid rgba(255,255,255,0.2);
-  border-radius:50%;pointer-events:none;z-index:9999;
-  transform:translate(-50%,-50%);
-  transition:width .2s,height .2s,border-color .2s;
-}
-.fog-cursor-ring.hovering{width:48px;height:48px;border-color:var(--green)}
-.fog-cursor-dot{
-  position:fixed;width:4px;height:4px;
-  background:rgba(255,255,255,0.8);border-radius:50%;
-  pointer-events:none;z-index:9999;
-  transform:translate(-50%,-50%);
-}
-#gridCanvas,#fogCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none}
-#gridCanvas{z-index:0}
-#fogCanvas{z-index:1}
-.crt-overlay{position:fixed;inset:0;pointer-events:none;z-index:9100;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.045) 2px,rgba(0,0,0,0.045) 3px);animation:crt-flicker 8s ease-in-out infinite;}
-.crt-overlay::before{content:'';position:absolute;inset:-100%;width:300%;height:300%;opacity:0.04;background-image:var(--grain-url,none);background-repeat:repeat;animation:crt-grain 0.14s steps(1) infinite;}
-@keyframes crt-flicker{0%,100%{opacity:1}48%{opacity:.98}50%{opacity:.95}52%{opacity:.98}}
-@keyframes crt-grain{0%{transform:translate(0,0)}10%{transform:translate(-3%,-3%)}20%{transform:translate(3%,3%)}30%{transform:translate(-2%,2%)}40%{transform:translate(2%,-2%)}50%{transform:translate(-4%,1%)}60%{transform:translate(4%,-1%)}70%{transform:translate(-1%,4%)}80%{transform:translate(1%,-4%)}90%{transform:translate(-3%,2%)}100%{transform:translate(3%,-2%)}}
+/* ============ 背景 ============ */
+
 img,svg{display:block;max-width:100%}
 ::selection{background:var(--green);color:var(--bg)}
 
@@ -296,17 +275,6 @@ em,.italic{font-style:italic;font-family:var(--serif)}
   position:relative;overflow:visible;
   min-height:max(85vh, 600px);display:flex;flex-direction:column;justify-content:center;
 }
-/* Blueprint grid overlay */
-.hero::after{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-  background-image:
-    linear-gradient(rgba(2,185,128,0.038) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(2,185,128,0.038) 1px,transparent 1px);
-  background-size:52px 52px;
-  mask-image:radial-gradient(ellipse 85% 80% at 50% 40%,rgba(0,0,0,0.55) 0%,transparent 80%);
-  -webkit-mask-image:radial-gradient(ellipse 85% 80% at 50% 40%,rgba(0,0,0,0.55) 0%,transparent 80%);
-}
-.hero .glow-top{top:-120px;opacity:.4}
 
 .hero-kicker{
   display:flex;align-items:center;gap:14px;
@@ -325,19 +293,8 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 .hero-title .line > span{display:inline-block}
 .hero-title em{
   font-style:italic;color:var(--green);
-  text-shadow:0 0 40px var(--green-glow);
   font-variation-settings:"opsz" 144;
 }
-/* scan canvas sits on top of the title text */
-.hero-title-canvas{
-  position:absolute;inset:0;pointer-events:none;z-index:2;
-}
-@keyframes emPulse{
-  0%{text-shadow:0 0 40px var(--green-glow)}
-  50%{text-shadow:0 0 80px rgba(2,185,128,.6), 0 0 120px rgba(2,185,128,.3)}
-  100%{text-shadow:0 0 40px var(--green-glow)}
-}
-.hero-title.scan-done em{animation:emPulse 2.8s ease-in-out infinite}
 .hero-sub{
   max-width:56ch;font-size:19px;line-height:1.7;color:var(--fg-2);
   margin-top:40px;position:relative;z-index:1;
@@ -362,17 +319,25 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 .hero-meta .cell .v .unit{font-size:16px;color:var(--fg-3);margin-left:2px}
 @media(max-width:700px){.hero-meta{grid-template-columns:repeat(2,1fr)}}
 
+/* ── 三画面 Hero ── */
+.hero-v1,.hero-v2,.hero-v3{max-width:1080px}
+.hero-v2 .hero-meta{margin-top:60px}
+.hero-meta-strong .v{font-size:clamp(34px,4vw,56px)}
+.hero-flow{position:relative;margin-top:72px;height:120px;opacity:.5}
+.flow-line{
+  position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  animation:flowMove 4s ease-in-out infinite;
+}
+.flow-line-2{top:40px;animation-delay:1.2s;opacity:.6}
+.flow-line-3{top:80px;animation-delay:2.4s;opacity:.35}
+@keyframes flowMove{0%,100%{transform:scaleX(.2);opacity:0}30%,70%{transform:scaleX(1);opacity:1}}
+
 .bm-char{ display:inline-block; will-change:transform,color; }
 /* ── LiquidHeading scroll-in reveal ── */
 .lh-pending .bm-char{opacity:0;filter:blur(5px);}
 .lh-revealed .bm-char{animation:lhReveal 0.48s ease forwards;animation-delay:calc(var(--ci) * 14ms);}
 @keyframes lhReveal{from{opacity:0;filter:blur(5px);}to{opacity:1;filter:blur(0);}}
-
-/* ── A. Ambient cursor glow ── */
-.cursor-glow{
-  position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(600px circle at var(--cx,-9999px) var(--cy,-9999px), rgba(2,185,128,0.055), transparent 60%);
-}
 
 /* ============ Section 头部 ============ */
 .sec-head{
@@ -485,74 +450,32 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 .bm-word.bm-outline.bm-lit{-webkit-text-stroke:1px var(--fg-3);color:transparent;}
 .bm-word.bm-em.bm-lit{color:var(--green);text-shadow:0 0 40px var(--green-glow);}
 
-/* ============ 岗位列表 ============ */
-.jobs-head{display:flex;align-items:end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:32px}
-.jobs-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.jobs-list{border-top:1px solid var(--line-2)}
-
-.job{
-  display:grid;grid-template-columns:60px 1.6fr 1fr 1fr 40px;
-  gap:24px;align-items:center;padding:20px 0;
-  border-bottom:1px solid var(--line);cursor:pointer;
-  position:relative;
-  transform-style:preserve-3d;
-  will-change:transform;
-  isolation:isolate;
-  transition:transform .15s ease, background .3s ease, box-shadow .3s ease, padding .35s var(--ease);
+/* ============ 职位分类标签（B 方案：跳飞书招聘官网） ============ */
+.job-cats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  border-top:1px solid var(--line-2);padding-top:40px;
 }
-
-/* ── Reijo · 机加工哑光面 hover ── */
-.job:hover{
-  padding-left:16px;padding-right:16px;
-  background:rgba(13,13,15,0.98);
-  /* 顶边迎光亮线 + 左侧细高光 + 外部阴影 + 轮廓边框 */
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.11),
-    inset 1px 0 0 rgba(255,255,255,0.05),
-    0 12px 56px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(255,255,255,0.07);
-  z-index:2;
+.job-cat{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:28px 24px;
+  border:1px solid var(--line);border-radius:var(--r-md);
+  transition:all .3s var(--ease);
 }
-.job:hover .job-arrow{border-color:var(--green);color:var(--green);box-shadow:0 0 12px var(--green-glow)}
-
-/* ── 鼠标跟随聚光灯 ── */
-.job::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  background:radial-gradient(
-    ellipse 55% 80% at
-      calc(50% + var(--mx,0) * 90%)
-      calc(50% + var(--my,0) * 80%),
-    rgba(255,255,255,0.09) 0%,
-    rgba(255,255,255,0.02) 45%,
-    transparent 70%
-  );
-  opacity:0;
-  transition:opacity .3s ease;
-  z-index:1;
+.job-cat:hover{
+  border-color:var(--line-3);background:var(--bg-raised);
+  transform:translateY(-2px);
 }
-.job:hover::after{opacity:1}
-.job-num{font-family:var(--mono);font-size:12px;color:var(--fg-4)}
-.job-title{font-family:var(--serif);font-size:24px;line-height:1.12;letter-spacing:-0.015em}
-.job-level{
-  font-size:12px;color:var(--fg-4);margin-top:4px;
-  font-family:var(--mono);letter-spacing:0.06em;text-transform:uppercase;
+.job-cat-name{font-family:var(--sans);font-size:19px;font-weight:500;letter-spacing:-0.01em}
+.job-cat-arrow{
+  font-size:15px;color:var(--fg-4);
+  transition:all .3s var(--ease);
 }
-.job-team{font-size:14px;color:var(--fg-3)}
-.job-loc{font-size:14px;color:var(--fg-3);display:flex;gap:8px;align-items:center}
-.job-loc .loc-dot{
-  width:5px;height:5px;border-radius:50%;background:var(--green);flex:0 0 5px;
-  box-shadow:0 0 6px var(--green-glow);
-}
-.job-arrow{
-  width:32px;height:32px;border-radius:50%;border:1px solid var(--line-2);
-  display:grid;place-items:center;transition:all .35s var(--ease);justify-self:end;
-}
+.job-cat:hover .job-cat-arrow{color:var(--green);transform:translateX(4px)}
 @media(max-width:900px){
-  .job{grid-template-columns:44px 1fr 40px}
-  .job-urgency-col,.job-loc-col,.job-sparkline{display:none}
+  .job-cats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .job-cats{grid-template-columns:1fr}
 }
 
 /* ============ 员工故事 · 逐词浮现 + 关键词扫光 ============ */
@@ -1040,112 +963,3 @@ em,.italic{font-style:italic;font-family:var(--serif)}
 .oee-modal .btn{background:transparent;border:1px solid rgba(2,185,128,0.5);border-radius:0;color:#02B980;letter-spacing:.14em;text-shadow:0 0 8px rgba(2,185,128,0.4);box-shadow:none;font-size:11px;padding:8px 22px;}
 .oee-modal .btn:hover{background:rgba(2,185,128,0.1);border-color:rgba(2,185,128,0.9);box-shadow:0 0 18px rgba(2,185,128,0.2);color:#40D898;}
 
-/* ============ Hero 2-column layout ============ */
-@media (min-width:1100px){
-  .hero-wrap-grid{
-    display:grid;
-    grid-template-columns:1fr 420px;
-    align-items:center;
-    gap:48px;
-  }
-}
-.hero-terminal-col{display:flex;align-items:center;justify-content:center;margin-top:-420px;}
-@media (max-width:1099px){.hero-terminal-col{display:none;}}
-
-/* ============ Hero Terminal ============ */
-@keyframes htFloat{0%,100%{transform:translateY(0px)}50%{transform:translateY(-7px)}}
-@keyframes htLed{0%,45%{opacity:1}50%,95%{opacity:0.22}100%{opacity:1}}
-
-.hero-terminal-outer{
-  perspective:1300px;
-  perspective-origin:46% 48%;
-  animation:htFloat 6s ease-in-out infinite;
-}
-.hero-terminal-body{
-  transform-style:preserve-3d;
-  transform:rotateY(-18deg) rotateX(-6deg);
-  will-change:transform;
-  position:relative;
-  width:340px;
-  height:290px;
-}
-/* Front face */
-.ht-face{
-  position:absolute;inset:0;
-  background:linear-gradient(158deg,#27272c 0%,#1c1c21 55%,#161619 100%);
-  border-radius:10px 10px 4px 4px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.07),
-    inset 0 -1px 0 rgba(0,0,0,0.4),
-    0 0 0 1px rgba(255,255,255,0.04),
-    20px 32px 64px rgba(0,0,0,0.65);
-  transform:translateZ(1px);
-  padding:22px 22px 38px;
-  display:flex;
-  flex-direction:column;
-}
-/* Right thick side */
-.ht-right{
-  position:absolute;right:0;top:10px;bottom:10px;
-  width:58px;
-  background:linear-gradient(to left,#0d0d10,#161618);
-  border-radius:0 6px 4px 0;
-  transform-origin:100% 50%;
-  transform:rotateY(-90deg);
-  box-shadow:inset 3px 0 8px rgba(0,0,0,0.7);
-}
-/* Bottom */
-.ht-bottom{
-  position:absolute;left:8px;right:8px;bottom:0;height:36px;
-  background:linear-gradient(to bottom,#1b1b1f,#101012);
-  border-radius:0 0 6px 6px;
-  transform-origin:50% 100%;
-  transform:rotateX(-90deg);
-  box-shadow:0 12px 28px rgba(0,0,0,0.55);
-}
-/* Screen bezel */
-.ht-bezel{
-  flex:1;
-  background:#020a05;
-  border-radius:4px;
-  border:1px solid rgba(2,185,128,0.2);
-  box-shadow:inset 0 0 18px rgba(0,0,0,0.85),0 0 28px rgba(2,185,128,0.07);
-  display:flex;flex-direction:column;
-  overflow:hidden;position:relative;
-}
-.ht-bezel::after{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.14) 2px,rgba(0,0,0,0.14) 4px);
-  pointer-events:none;z-index:5;
-  animation:navcomScan 0.14s linear infinite;
-}
-/* Top status bar */
-.ht-topbar{
-  font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;
-  color:rgba(2,185,128,0.42);padding:4px 7px;
-  border-bottom:1px solid rgba(2,185,128,0.1);
-  display:flex;align-items:center;gap:5px;
-  flex-shrink:0;white-space:nowrap;
-}
-.ht-online{color:#02B980;text-shadow:0 0 6px rgba(2,185,128,0.65);}
-/* Canvas */
-.ht-canvas{display:block;width:100%;height:140px;flex-shrink:0;}
-/* Log */
-.ht-log{
-  flex:1;font-family:var(--mono);font-size:6.5px;letter-spacing:.05em;
-  color:rgba(2,185,128,0.38);padding:3px 7px 4px;
-  border-top:1px solid rgba(2,185,128,0.1);
-  overflow:hidden;line-height:1.65;
-}
-.ht-log-line{display:block;}
-.ht-log-ok{color:rgba(2,185,128,0.62);}
-.ht-log-warn{color:rgba(232,168,40,0.55);}
-.ht-log-run{color:rgba(2,185,128,0.28);}
-/* Power LED */
-.ht-power-led{
-  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-  width:6px;height:6px;border-radius:50%;
-  background:#02B980;
-  box-shadow:0 0 5px rgba(2,185,128,0.9),0 0 10px rgba(2,185,128,0.4);
-  animation:htLed 2.4s ease-in-out infinite;
-}

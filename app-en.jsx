@@ -1,10 +1,9 @@
-/* global React, ReactDOM, window, Nav, ScrollBar, Hero, About, Manifesto, Jobs, CTA, Footer, JobDrawer, useReveal, CursorGlow, OEEGame */
+/* global React, ReactDOM, window, Nav, ScrollBar, Hero, About, Manifesto, Jobs, CTA, Footer, useReveal, OEEGame */
 // ============ Blacklake Careers v2 · App (EN) ============
 
 const { useState, useEffect } = React;
 
 function App() {
-  const [job, setJob] = useState(null);
   const rootRef = useReveal();
 
   useEffect(() => {
@@ -49,8 +48,7 @@ function App() {
 
   return (
     <div ref={rootRef} className="page">
-      <CursorGlow />
-      <ScrollBar />
+            <ScrollBar />
       <Nav onApply={() => scrollTo("jobs")} />
       <Hero
         onPrimary={() => scrollTo("jobs")}
@@ -58,11 +56,10 @@ function App() {
       />
       <About />
       <Manifesto />
-      <Jobs onOpen={setJob} />
+      <Jobs />
       <CTA onApply={() => scrollTo("jobs")} />
       <Footer />
-      <JobDrawer job={job} onClose={() => setJob(null)} />
-      <OEEGame />
+            <OEEGame />
     </div>
   );
 }

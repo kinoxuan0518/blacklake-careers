@@ -1,10 +1,9 @@
-/* global React, ReactDOM, window, Nav, ScrollBar, Hero, About, Manifesto, Jobs, CTA, Footer, JobDrawer, useReveal, CursorGlow, OEEGame */
-// ============ Heihu Careers v2 · App (Hedge-Fund Minimal) ============
+/* global React, ReactDOM, window, Nav, ScrollBar, Hero, About, Manifesto, Jobs, CTA, Footer, useReveal, OEEGame */
+// ============ Heihu Careers v2 · App (Kimi × Linear) ============
 
 const { useState, useEffect } = React;
 
 function App() {
-  const [job, setJob] = useState(null);
   const rootRef = useReveal();
 
   // 滚动进入视口时触发 reveal 动画
@@ -51,7 +50,6 @@ function App() {
 
   return (
     <div ref={rootRef} className="page">
-      <CursorGlow />
       <ScrollBar />
       <Nav onApply={() => scrollTo("jobs")} />
       <Hero
@@ -60,10 +58,9 @@ function App() {
       />
       <About />
       <Manifesto />
-      <Jobs onOpen={setJob} />
+      <Jobs />
       <CTA onApply={() => scrollTo("jobs")} />
       <Footer />
-      <JobDrawer job={job} onClose={() => setJob(null)} />
       <OEEGame />
     </div>
   );

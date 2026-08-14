@@ -93,104 +93,6 @@ function ScrollBar() {
   return <div className="scroll-bar"><i style={{ width: `${p}%` }} /></div>;
 }
 
-// ── Drawer: Job Detail ──
-function JobDrawer({ job, onClose }) {
-  useEffect(() => {
-    const h = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", h);
-    if (job) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { window.removeEventListener("keydown", h); document.body.style.overflow = ""; };
-  }, [job, onClose]);
-
-  return (
-    <>
-      <div className={`drawer-mask ${job ? "open" : ""}`} onClick={onClose} />
-      <aside className={`drawer ${job ? "open" : ""}`} aria-hidden={!job}>
-        {job && (
-          <>
-            <div className="drawer-head">
-              <span className="caption">{job.team} · {job.id}</span>
-              <button className="drawer-close" onClick={onClose} aria-label="Close">
-                <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1L11 11M11 1L1 11" stroke="currentColor" strokeWidth="1.3"/></svg>
-              </button>
-            </div>
-            <div className="drawer-body">
-              <div className="caption" style={{ marginBottom: 16 }}>{job.category}</div>
-              <h1>{job.title}</h1>
-              <div className="drawer-meta">
-                <span className="chip"><span className="chip-dot"></span>{job.loc}</span>
-                <span className="chip">{job.type}</span>
-                <span className="chip">{job.level}</span>
-              </div>
-              <p style={{ fontFamily: "var(--serif)", fontSize: 21, lineHeight: 1.5, color: "var(--fg)" }}>{job.desc}</p>
-              <h3>What You'll Do</h3>
-              <ul>{job.resp.map((r, i) => <li key={i}>{r}</li>)}</ul>
-              <h3>What We're Looking For</h3>
-              <ul>{job.req.map((r, i) => <li key={i}>{r}</li>)}</ul>
-              <h3>About the Team</h3>
-              <p>You'll join the <b style={{ color: "var(--fg)" }}>{job.team}</b> team — currently 12-30 people, flat communication, project-based collaboration, led by a 10+ year industry veteran.</p>
-            </div>
-            <div className="drawer-cta">
-              <div style={{ fontSize: 13, color: "var(--fg-3)" }}>We respond within 5 business days of receiving your resume</div>
-              <a className="btn" href={`mailto:careers@blacklake.cn?subject=${encodeURIComponent('Application: ' + job.title)}&body=${encodeURIComponent('Role ID: ' + job.id + '\n\nPlease attach your resume or portfolio.')}`}>
-                Apply Now <Arrow />
-              </a>
-            </div>
-          </>
-        )}
-      </aside>
-    </>
-  );
-}
-
-function CursorGlow() {
-  useEffect(() => {
-    const el = document.createElement("div");
-    el.className = "cursor-glow";
-    document.body.appendChild(el);
-    const onMove = e => {
-      el.style.setProperty("--cx", e.clientX + "px");
-      el.style.setProperty("--cy", e.clientY + "px");
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => { window.removeEventListener("mousemove", onMove); el.remove(); };
-  }, []);
-  return null;
-}
-
-function useTiltEffect(ref) {
-  useEffect(() => {
-    const grid = ref.current;
-    if (!grid) return;
-    const onMove = e => {
-      const card = e.target.closest(".story");
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = `perspective(700px) rotateX(${(-y*10).toFixed(1)}deg) rotateY(${(x*10).toFixed(1)}deg) scale(1.025)`;
-      card.style.zIndex = "2";
-      const glare = card.querySelector(".story-glare");
-      if (glare) {
-        glare.style.opacity = "1";
-        glare.style.background = `radial-gradient(circle at ${((x+0.5)*100).toFixed(0)}% ${((y+0.5)*100).toFixed(0)}%, rgba(255,255,255,0.11), transparent 65%)`;
-      }
-    };
-    const onOut = e => {
-      const card = e.target.closest(".story");
-      if (!card || card.contains(e.relatedTarget)) return;
-      card.style.transform = "";
-      card.style.zIndex = "";
-      const glare = card.querySelector(".story-glare");
-      if (glare) glare.style.opacity = "0";
-    };
-    grid.addEventListener("mousemove", onMove);
-    grid.addEventListener("mouseout", onOut);
-    return () => { grid.removeEventListener("mousemove", onMove); grid.removeEventListener("mouseout", onOut); };
-  }, []);
-}
-
 function flattenChildren(children) {
   const out = [];
   const pushStr = (str, cls) => {
@@ -427,4 +329,4 @@ function OdometerStat({ value, suffix, label, duration = 1900, delay = 0 }) {
   );
 }
 
-Object.assign(window, { Nav, Arrow, ScrollBar, JobDrawer, useReveal, useCountUp, OdometerStat, LiquidHeading, CursorGlow, useTiltEffect });
+Object.assign(window, { Nav, Arrow, ScrollBar, useReveal, useCountUp, OdometerStat, LiquidHeading });

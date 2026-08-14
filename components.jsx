@@ -112,106 +112,6 @@ function ScrollBar() {
   return <div className="scroll-bar"><i style={{ width: `${p}%` }} /></div>;
 }
 
-// ── 抽屉：职位详情 ──
-function JobDrawer({ job, onClose }) {
-  useEffect(() => {
-    const h = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", h);
-    if (job) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { window.removeEventListener("keydown", h); document.body.style.overflow = ""; };
-  }, [job, onClose]);
-
-  return (
-    <>
-      <div className={`drawer-mask ${job ? "open" : ""}`} onClick={onClose} />
-      <aside className={`drawer ${job ? "open" : ""}`} aria-hidden={!job}>
-        {job && (
-          <>
-            <div className="drawer-head">
-              <span className="caption">{job.team} · {job.id}</span>
-              <button className="drawer-close" onClick={onClose} aria-label="关闭">
-                <svg width="12" height="12" viewBox="0 0 12 12"><path d="M1 1L11 11M11 1L1 11" stroke="currentColor" strokeWidth="1.3"/></svg>
-              </button>
-            </div>
-            <div className="drawer-body">
-              <div className="caption" style={{ marginBottom: 16 }}>{job.category}</div>
-              <h1>{job.title}</h1>
-              <div className="drawer-meta">
-                <span className="chip"><span className="chip-dot"></span>{job.loc}</span>
-                <span className="chip">{job.type}</span>
-                <span className="chip">{job.level}</span>
-              </div>
-              <p style={{ fontFamily: "var(--serif)", fontSize: 21, lineHeight: 1.5, color: "var(--fg)" }}>{job.desc}</p>
-              <h3>你将做什么</h3>
-              <ul>{job.resp.map((r, i) => <li key={i}>{r}</li>)}</ul>
-              <h3>我们期待你</h3>
-              <ul>{job.req.map((r, i) => <li key={i}>{r}</li>)}</ul>
-              <h3>关于团队</h3>
-              <p>你将加入 <b style={{ color: "var(--fg)" }}>{job.team}</b> 团队。团队目前规模 12-30 人，扁平沟通，项目制协作，由一位在行业 10 年以上的负责人带领。</p>
-            </div>
-            <div className="drawer-cta">
-              <div style={{ fontSize: 13, color: "var(--fg-3)" }}>简历投递后 5 个工作日内反馈</div>
-              <a className="btn" href={`mailto:careers@blacklake.cn?subject=${encodeURIComponent('应聘：' + job.title)}&body=${encodeURIComponent('职位编号：' + job.id + '\n\n请附上简历或作品集。')}`}>
-                投递简历 <Arrow />
-              </a>
-            </div>
-          </>
-        )}
-      </aside>
-    </>
-  );
-}
-
-// ── A. Ambient cursor glow ──
-function CursorGlow() {
-  useEffect(() => {
-    const el = document.createElement("div");
-    el.className = "cursor-glow";
-    document.body.appendChild(el);
-    const onMove = e => {
-      el.style.setProperty("--cx", e.clientX + "px");
-      el.style.setProperty("--cy", e.clientY + "px");
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => { window.removeEventListener("mousemove", onMove); el.remove(); };
-  }, []);
-  return null;
-}
-
-// ── B. Story card 3D tilt + glare ──
-function useTiltEffect(ref) {
-  useEffect(() => {
-    const grid = ref.current;
-    if (!grid) return;
-    const onMove = e => {
-      const card = e.target.closest(".story");
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = `perspective(700px) rotateX(${(-y*10).toFixed(1)}deg) rotateY(${(x*10).toFixed(1)}deg) scale(1.025)`;
-      card.style.zIndex = "2";
-      const glare = card.querySelector(".story-glare");
-      if (glare) {
-        glare.style.opacity = "1";
-        glare.style.background = `radial-gradient(circle at ${((x+0.5)*100).toFixed(0)}% ${((y+0.5)*100).toFixed(0)}%, rgba(255,255,255,0.11), transparent 65%)`;
-      }
-    };
-    const onOut = e => {
-      const card = e.target.closest(".story");
-      if (!card || card.contains(e.relatedTarget)) return;
-      card.style.transform = "";
-      card.style.zIndex = "";
-      const glare = card.querySelector(".story-glare");
-      if (glare) glare.style.opacity = "0";
-    };
-    grid.addEventListener("mousemove", onMove);
-    grid.addEventListener("mouseout", onOut);
-    return () => { grid.removeEventListener("mousemove", onMove); grid.removeEventListener("mouseout", onOut); };
-  }, []);
-}
-
 // ── Flatten JSX children (text + em) into char items ──
 function flattenChildren(children) {
   const out = [];
@@ -510,4 +410,4 @@ function OdometerStat({ value, suffix, label, duration = 1900, delay = 0 }) {
   );
 }
 
-Object.assign(window, { Nav, Arrow, ScrollBar, JobDrawer, useReveal, useCountUp, OdometerStat, LiquidHeading, CursorGlow, useTiltEffect });
+Object.assign(window, { Nav, Arrow, ScrollBar, useReveal, useCountUp, OdometerStat, LiquidHeading });

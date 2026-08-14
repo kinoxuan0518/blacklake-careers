@@ -40,7 +40,16 @@ const JOBS = [
     req: ["每周 4 天起，持续 3 个月以上", "ML / NLP / CV 功底扎实，有项目或论文经历", "对工业 AI 真实落地有好奇心"] },
 ];
 
-const CATEGORIES = ["全部", "AI · 算法", "产品", "工程", "解决方案", "交付", "实习 / 校招"];
+// ── 飞书招聘官网（B 方案：岗位全在飞书，站内只留分类标签跳转）──
+const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: 替换为真实飞书招聘官网地址
+
+// ── Hero 画面切换（1=使命陈述 / 2=真实数据墙 / 3=工业xAI合成）──
+const HERO_VARIANT = 2;
+
+// ── 使命文案 ──
+const MISSION_LINES = ["未来十年最大的 AI 应用，", "不会只发生在互联网，", "而会深入真实世界，", "重塑制造业这一全球最大的产业。"];
+
+const CATEGORIES = ["AI · 算法", "产品", "工程", "解决方案", "交付", "实习 / 校招"];
 const LOCATIONS = ["全部城市", "上海", "深圳", "广州", "苏州 / 常州", "新加坡", "远程"];
 
 // ── Hero 统计数据（来自宣传资料） ──
@@ -51,4 +60,4 @@ const HERO_STATS = [
   { k: "成立于", v: "2016", unit: "", countUp: false },
 ];
 
-Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS });
+Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS, RECRUIT_URL, HERO_VARIANT, MISSION_LINES });

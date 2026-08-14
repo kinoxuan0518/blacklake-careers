@@ -1,296 +1,12 @@
-/* global React, window, JOBS, CATEGORIES, LOCATIONS, HERO_STATS, Arrow, useCountUp */
+/* global React, window, JOBS, CATEGORIES, HERO_STATS, RECRUIT_URL, HERO_VARIANT, Arrow, useCountUp */
 
 const { useState: useS, useMemo: useM, useRef: useR, useEffect: useE } = React;
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-function _jobHash(id) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
-  return h >>> 0;
-}
-
-// ═══════════════════════════════ Hero Terminal ═══════════════════════════════
-function HeroTerminal() {
-  const bodyRef   = useR(null);
-  const canvasRef = useR(null);
-  const logRef    = useR(null);
-
-  // ── Spring-damper tilt driven by hero mousemove ──
-  useE(() => {
-    const hero = document.querySelector('.hero');
-    const body = bodyRef.current;
-    if (!hero || !body) return;
-    const BY = -18, BX = -6;
-    let ry = BY, rx = BX, vry = 0, vrx = 0, tRy = BY, tRx = BX, raf = null;
-    const step = () => {
-      vry = vry * 0.68 + (tRy - ry) * 0.22;
-      vrx = vrx * 0.68 + (tRx - rx) * 0.22;
-      ry += vry; rx += vrx;
-      body.style.transform = `rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg)`;
-      const done = Math.abs(ry-tRy)<0.05 && Math.abs(rx-tRx)<0.05 && Math.abs(vry)<0.02 && Math.abs(vrx)<0.02;
-      raf = done ? null : requestAnimationFrame(step);
-    };
-    const onMove = e => {
-      const r = hero.getBoundingClientRect();
-      tRy = BY + ((e.clientX - r.left) / r.width  - 0.5) * 50;
-      tRx = BX - ((e.clientY - r.top)  / r.height - 0.5) * 32;
-      if (!raf) raf = requestAnimationFrame(step);
-    };
-    const onLeave = () => { tRy = BY; tRx = BX; if (!raf) raf = requestAnimationFrame(step); };
-    hero.addEventListener('mousemove', onMove);
-    hero.addEventListener('mouseleave', onLeave);
-    return () => { cancelAnimationFrame(raf); hero.removeEventListener('mousemove', onMove); hero.removeEventListener('mouseleave', onLeave); };
-  }, []);
-
-  // ── Canvas wireframe boot sequence ──
-  useE(() => {
-    const cv = canvasRef.current;
-    if (!cv) return;
-    const dpr = window.devicePixelRatio || 1;
-    const W = cv.offsetWidth || 296, H = 140;
-    cv.width = W * dpr; cv.height = H * dpr;
-    const ctx = cv.getContext('2d');
-    ctx.scale(dpr, dpr);
-    const cx = W / 2, cy = H / 2;
-
-    // Cube geometry
-    const S = 0.58;
-    const V0 = [[-S,-S,-S],[S,-S,-S],[S,S,-S],[-S,S,-S],[-S,-S,S],[S,-S,S],[S,S,S],[-S,S,S]].map(([x,y,z])=>({x,y,z}));
-    const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
-    const rotY = (v,a) => ({x:v.x*Math.cos(a)-v.z*Math.sin(a),y:v.y,z:v.x*Math.sin(a)+v.z*Math.cos(a)});
-    const rotX = (v,a) => ({x:v.x,y:v.y*Math.cos(a)-v.z*Math.sin(a),z:v.y*Math.sin(a)+v.z*Math.cos(a)});
-    const proj = (v,sc,d=2.8) => ({x:cx+v.x/(v.z+d)*sc, y:cy+v.y/(v.z+d)*sc});
-
-    let raf, t0=null, angle=0, pulseIdx=-1, pulseTs=0;
-
-    const BOOT = ['INIT SEQUENCE ·········','MES ENGINE ·········· LOAD','FACTORY LINK ·········· SYNC','UPLINK ·············· OK'];
-    const LOGS = [
-      {cls:'ok', t:'[OK] FACTORY NODES ··· 40,127'},
-      {cls:'ok', t:'[OK] MES SCHEDULER ···· ACTIVE'},
-      {cls:'ok', t:'[OK] QUALITY MONITOR ·· ONLINE'},
-      {cls:'run',t:'[··] ANOMALY SCAN ····· RUNNING'},
-      {cls:'ok', t:'[OK] AI VISION ·········· LIVE'},
-      {cls:'ok', t:'[OK] OEE ENGINE ········ READY'},
-      {cls:'warn',t:'[··] DATA SYNC ········· 98.3%'},
-    ];
-    let logIdx = 0;
-    const addLog = () => {
-      if (!logRef.current || logIdx >= LOGS.length) return;
-      const {cls,t} = LOGS[logIdx++];
-      const s = document.createElement('span');
-      s.className = `ht-log-line ht-log-${cls}`; s.textContent = t;
-      logRef.current.appendChild(s);
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    };
-    const timers = LOGS.map((_,i) => setTimeout(addLog, 1400 + i * 1900));
-
-    const draw = ts => {
-      if (!t0) t0 = ts;
-      const el = (ts - t0) / 1000;
-      ctx.clearRect(0,0,W,H); ctx.fillStyle='#020808'; ctx.fillRect(0,0,W,H);
-
-      if (el < 0.5) {
-        // blank
-      } else if (el < 4.2) {
-        // Boot text
-        ctx.font='7.5px monospace'; ctx.textAlign='center';
-        const n = Math.min(Math.floor((el-0.5)/0.9)+1, BOOT.length);
-        BOOT.slice(0,n).forEach((line,i) => {
-          ctx.fillStyle = i<n-1 ? 'rgba(2,185,128,0.3)' : 'rgba(2,185,128,0.85)';
-          ctx.fillText(line, cx, cy - 16 + i*14);
-        });
-        if (Math.floor(el*2)%2===0) {
-          ctx.fillStyle='rgba(2,185,128,0.85)';
-          ctx.fillText('_', cx + ctx.measureText(BOOT[n-1]).width*0.5 + 4, cy-16+(n-1)*14);
-        }
-        // Partial cube builds from 2.5s
-        if (el > 2.5) {
-          const prog = Math.min((el-2.5)/1.7, 1);
-          angle += 0.005;
-          const ne = Math.floor(prog * EDGES.length);
-          const sc = 24 + prog * 26;
-          const vp = V0.map(v => proj(rotX(rotY(v,angle),0.28), sc));
-          ctx.strokeStyle='rgba(2,185,128,0.38)'; ctx.lineWidth=0.8;
-          for (let i=0;i<ne;i++) { const [a,b]=EDGES[i]; ctx.beginPath(); ctx.moveTo(vp[a].x,vp[a].y); ctx.lineTo(vp[b].x,vp[b].y); ctx.stroke(); }
-          ctx.fillStyle='rgba(2,185,128,0.75)';
-          for (let i=0;i<Math.floor(prog*8);i++) { ctx.beginPath(); ctx.arc(vp[i].x,vp[i].y,1.3,0,Math.PI*2); ctx.fill(); }
-        }
-      } else {
-        // Full rotating cube
-        angle += 0.007;
-        if (ts - pulseTs > 2000 + Math.random()*1400) { pulseIdx = Math.floor(Math.random()*EDGES.length); pulseTs = ts; }
-        const vp = V0.map(v => proj(rotX(rotY(v,angle),0.28), 50));
-        EDGES.forEach(([a,b],i) => {
-          const pulse = i===pulseIdx;
-          ctx.strokeStyle = pulse ? '#02B980' : 'rgba(2,185,128,0.52)';
-          ctx.lineWidth = pulse ? 1.5 : 0.9;
-          ctx.shadowColor = pulse ? '#02B980' : 'transparent';
-          ctx.shadowBlur  = pulse ? 5 : 0;
-          ctx.beginPath(); ctx.moveTo(vp[a].x,vp[a].y); ctx.lineTo(vp[b].x,vp[b].y); ctx.stroke();
-          ctx.shadowBlur = 0;
-        });
-        ctx.fillStyle='rgba(2,185,128,0.9)';
-        vp.forEach(p => { ctx.beginPath(); ctx.arc(p.x,p.y,1.7,0,Math.PI*2); ctx.fill(); });
-        ctx.font='6.5px monospace'; ctx.textAlign='right'; ctx.fillStyle='rgba(2,185,128,0.22)';
-        ctx.fillText('OEE · LIVE', W-5, H-4); ctx.textAlign='left';
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); timers.forEach(clearTimeout); };
-  }, []);
-
-  return (
-    <div className="hero-terminal-col">
-      <div className="hero-terminal-outer">
-        <div className="hero-terminal-body" ref={bodyRef}>
-          <div className="ht-face">
-            <div className="ht-bezel">
-              <div className="ht-topbar">
-                <span>HEIHU MES v4.2</span>
-                <span style={{color:'rgba(2,185,128,0.2)'}}>·</span>
-                <span className="ht-online">● ONLINE</span>
-              </div>
-              <canvas ref={canvasRef} className="ht-canvas" />
-              <div ref={logRef} className="ht-log" />
-            </div>
-            <span className="ht-power-led" />
-          </div>
-          <div className="ht-right" />
-          <div className="ht-bottom" />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════ Hero ═══════════════════════════════
 function Hero({ onPrimary, onSecondary }) {
   const titleRef = useR(null);
   const canvasRef = useR(null);
 
-  useE(() => {
-    const title = titleRef.current;
-    if (!title) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.className = "hero-title-canvas";
-    title.appendChild(canvas);
-    canvasRef.current = canvas;
-
-    const rect = title.getBoundingClientRect();
-    const lineEls = Array.from(title.querySelectorAll(".line"));
-    const lineRects = lineEls.map(l => {
-      const lr = l.getBoundingClientRect();
-      return { top: lr.top - rect.top, height: lr.height };
-    });
-
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + "px";
-    canvas.style.height = rect.height + "px";
-
-    const ctx = canvas.getContext("2d");
-    ctx.scale(dpr, dpr);
-    const W = rect.width, H = rect.height;
-
-    // Initial full mask
-    ctx.fillStyle = "#09090B";
-    ctx.fillRect(0, 0, W, H);
-
-    const LINE_DUR = 480, LINE_GAP = 90;
-    const TOTAL = lineRects.length * (LINE_DUR + LINE_GAP);
-    const particles = [];
-    let startTime = null, raf;
-
-    const tick = (ts) => {
-      if (!startTime) startTime = ts;
-      const elapsed = ts - startTime;
-
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "#09090B";
-      ctx.fillRect(0, 0, W, H);
-
-      lineRects.forEach((lr, li) => {
-        const lineStart = li * (LINE_DUR + LINE_GAP);
-        const lElapsed = Math.max(0, elapsed - lineStart);
-        const p = Math.min(lElapsed / LINE_DUR, 1);
-        if (p <= 0) return;
-
-        const cutX = p * W;
-        const { top, height: lh } = lr;
-
-        // Revealed region
-        ctx.clearRect(0, top, cutX, lh);
-
-        // Remaining mask
-        if (p < 1) {
-          ctx.fillStyle = "#09090B";
-          ctx.fillRect(cutX, top, W - cutX, lh);
-
-          // Trailing glow
-          const tg = ctx.createLinearGradient(Math.max(0, cutX - 100), 0, cutX, 0);
-          tg.addColorStop(0, "rgba(2,185,128,0)");
-          tg.addColorStop(1, "rgba(2,185,128,0.18)");
-          ctx.fillStyle = tg;
-          ctx.fillRect(Math.max(0, cutX - 100), top, Math.min(100, cutX), lh);
-
-          // Cutting head — bright vertical bar
-          const hg = ctx.createLinearGradient(0, top, 0, top + lh);
-          hg.addColorStop(0,   "rgba(200,255,230,0.7)");
-          hg.addColorStop(0.35,"rgba(2,185,128,1)");
-          hg.addColorStop(0.65,"rgba(2,185,128,1)");
-          hg.addColorStop(1,   "rgba(200,255,230,0.5)");
-          ctx.fillStyle = hg;
-          ctx.fillRect(cutX - 2, top, 4, lh);
-
-          // Outer glow bars
-          ctx.fillStyle = "rgba(2,185,128,0.35)";
-          ctx.fillRect(cutX - 7, top, 5, lh);
-          ctx.fillStyle = "rgba(2,185,128,0.12)";
-          ctx.fillRect(cutX - 16, top, 9, lh);
-
-          // Sparks
-          if (Math.random() < 0.55) {
-            particles.push({
-              x: cutX, y: top + Math.random() * lh,
-              vx: Math.random() * 3.5 + 0.5, vy: (Math.random() - 0.5) * 3,
-              life: 0.85 + Math.random() * 0.3, r: Math.random() * 1.4 + 0.4,
-            });
-          }
-        }
-      });
-
-      // Update & draw sparks
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const sp = particles[i];
-        sp.x += sp.vx; sp.y += sp.vy; sp.vy += 0.07; sp.life -= 0.045;
-        if (sp.life <= 0) { particles.splice(i, 1); continue; }
-        ctx.beginPath();
-        ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(2,185,128,${Math.min(sp.life, 0.9).toFixed(2)})`;
-        ctx.fill();
-      }
-
-      if (elapsed < TOTAL + 600 || particles.length > 0) {
-        raf = requestAnimationFrame(tick);
-      } else {
-        ctx.clearRect(0, 0, W, H);
-        title.classList.add("scan-done");
-        canvas.style.transition = "opacity .5s";
-        canvas.style.opacity = "0";
-        setTimeout(() => canvas.remove(), 600);
-      }
-    };
-
-    const timer = setTimeout(() => { raf = requestAnimationFrame(tick); }, 250);
-    return () => {
-      clearTimeout(timer);
-      cancelAnimationFrame(raf);
-      if (canvas.parentNode) canvas.remove();
-    };
-  }, []);
 
   // ── Hero title wave effect: gaussian hill follows mouse X ──
   useE(() => {
@@ -376,41 +92,68 @@ function Hero({ onPrimary, onSecondary }) {
 
   return (
     <section className="hero noise" id="top">
-      <div className="glow-top" />
-
-
-      <div className="wrap hero-wrap-grid">
-        <div>
-
-          <h1 className="h-hero hero-title" ref={titleRef}>
-            <span className="line"><span>{'代码的终极意义'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-            <span className="line"><span>{'是改变'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'真实'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em>{'世界。'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-          </h1>
-
-          <p className="hero-sub reveal">
-            黑湖的软件已经进入数万家中国工厂。每一行代码，都会影响真实的生产系统。
-          </p>
-
-          <div className="hero-actions reveal d-1">
-            <button className="btn" onClick={onPrimary}>
-              查看 {JOBS.length} 个在招职位 <Arrow />
-            </button>
-          </div>
-
-          <div className="hero-meta">
-            <OdometerStat value="40,000" suffix="+" label="服务工厂" duration={1800} delay={0} />
-            <OdometerStat value="52.7" suffix="%" label="SaaS MES 市占率" duration={1600} delay={120} />
-            <div className="cell reveal d-3">
-              <div className="k">成立于</div>
-              <div className="v">2016</div>
-            </div>
-            <div className="cell reveal d-4">
-              <div className="k">市场排名</div>
-              <div className="v">No.<span style={{ color: "var(--green)" }}>1</span></div>
+      <div className="wrap">
+        {HERO_VARIANT === 1 && (
+          /* ── 画面 1：使命陈述（纯文字 + 按钮）── */
+          <div className="hero-v1">
+            <div className="eyebrow hero-kicker reveal"><span className="dot" />Blacklake · Industrial AI</div>
+            <h1 className="h-hero hero-title" ref={titleRef}>
+              <span className="line"><span>{'未来十年最大的AI应用'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'不会只发生在互联网'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'而会深入真实世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'重塑制造业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'这一全球最大产业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
+            </h1>
+            <p className="hero-sub reveal">
+              如果你希望参与定义下一代工业 AI 的产品与技术，我们期待与你一起，把想象变成现实。
+            </p>
+            <div className="hero-actions reveal d-1">
+              <button className="btn" onClick={onPrimary}>查看 {JOBS.length} 个在招职位 <Arrow /></button>
             </div>
           </div>
-        </div>
-        <HeroTerminal />
+        )}
+
+        {HERO_VARIANT === 2 && (
+          /* ── 画面 2：使命陈述 + 真实数据墙 ── */
+          <div className="hero-v2">
+            <div className="eyebrow hero-kicker reveal"><span className="dot" />Blacklake · Industrial AI</div>
+            <h1 className="h-hero hero-title" ref={titleRef}>
+              <span className="line"><span>{'未来十年最大的AI应用'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'不会只发生在互联网'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'而会深入真实世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'重塑制造业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'这一全球最大产业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
+            </h1>
+            <div className="hero-actions reveal d-1">
+              <button className="btn" onClick={onPrimary}>查看 {JOBS.length} 个在招职位 <Arrow /></button>
+            </div>
+            <div className="hero-meta hero-meta-strong reveal d-2">
+              <OdometerStat value="40,000" suffix="+" label="工厂正在使用黑湖" duration={1800} delay={0} />
+              <OdometerStat value="52.7" suffix="%" label="中国云化 MES 市占率第一" duration={1600} delay={120} />
+              <div className="cell reveal d-3"><div className="k">累计执行任务</div><div className="v">1.6<span className="unit">亿次</span></div></div>
+              <div className="cell reveal d-4"><div className="k">工业 AI 领域</div><div className="v">WEF<span className="unit">入选</span></div></div>
+            </div>
+          </div>
+        )}
+
+        {HERO_VARIANT === 3 && (
+          /* ── 画面 3：使命陈述 + 工业 x AI 合成（数据流注入产线）── */
+          <div className="hero-v3">
+            <div className="eyebrow hero-kicker reveal"><span className="dot" />Blacklake · Industrial AI</div>
+            <h1 className="h-hero hero-title" ref={titleRef}>
+              <span className="line"><span>{'未来十年最大的AI应用'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'不会只发生在互联网'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'而会深入真实世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
+              <span className="line"><span>{'重塑制造业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'这一全球最大产业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
+            </h1>
+            <div className="hero-actions reveal d-1">
+              <button className="btn" onClick={onPrimary}>查看 {JOBS.length} 个在招职位 <Arrow /></button>
+            </div>
+            <div className="hero-flow reveal d-2" aria-hidden="true">
+              <div className="flow-line" />
+              <div className="flow-line flow-line-2" />
+              <div className="flow-line flow-line-3" />
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -485,75 +228,8 @@ function BigMarkReveal() {
 }
 
 // ═══════════════════════════════ Jobs ═══════════════════════════════
-function JobRow({ j, idx, onOpen }) {
-  const ref = useR(null);
-
-  useE(() => {
-    const el = ref.current;
-    if (!el) return;
-    let rafId;
-    const onMove = (e) => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect();
-        const mx = ((e.clientX - r.left) / r.width - 0.5);
-        const my = ((e.clientY - r.top) / r.height - 0.5);
-        el.style.setProperty('--mx', mx.toFixed(3));
-        el.style.setProperty('--my', my.toFixed(3));
-        el.style.transform = `perspective(1000px) rotateY(${(mx * 6).toFixed(2)}deg) rotateX(${(-my * 3.5).toFixed(2)}deg) translateZ(8px)`;
-      });
-    };
-    const onLeave = () => {
-      cancelAnimationFrame(rafId);
-      el.style.setProperty('--mx', '0');
-      el.style.setProperty('--my', '0');
-      el.style.transform = '';
-    };
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
-    return () => {
-      cancelAnimationFrame(rafId);
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
-    };
-  }, []);
-
-  const days = 1 + (_jobHash(j.id + 't') % 12);
-  const tsLabel = days < 7 ? `${days}d ago` : `${Math.ceil(days / 7)}w ago`;
-
-  return (
-    <div ref={ref} className="job" onClick={() => onOpen(j)}>
-      <div className="job-status">
-        <span className="job-pulse-wrap">
-          <span className="job-pulse-ring" />
-          <span className="job-pulse-dot" />
-        </span>
-        <span className="job-num">{String(idx + 1).padStart(2, '00')}</span>
-      </div>
-      <div>
-        <div className="job-title">{j.title}</div>
-        <div className="job-level">{j.level} · {j.type}</div>
-      </div>
-      <div className="job-team-col">
-        <div className="job-team">{j.team}</div>
-      </div>
-      <div className="job-loc-col">
-        <div className="job-loc"><span className="loc-dot" />{j.loc}</div>
-        <div className="job-ts">{tsLabel}</div>
-      </div>
-      <div className="job-arrow"><Arrow /></div>
-    </div>
-  );
-}
-
-function Jobs({ onOpen }) {
-  const [cat, setCat] = useS("全部");
-  const [loc, setLoc] = useS("全部城市");
-  const filtered = useM(() => JOBS.filter(j =>
-    (cat === "全部" || j.category === cat) &&
-    (loc === "全部城市" || j.loc.includes(loc.split(" ")[0]))
-  ), [cat, loc]);
-
+// ═══════════════════════════════ Jobs (分类标签 → 飞书招聘官网) ═══════════════════════════════
+function Jobs() {
   return (
     <section className="section" id="jobs">
       <div className="wrap">
@@ -563,41 +239,18 @@ function Jobs({ onOpen }) {
           </div>
           <div>
             <LiquidHeading className="h-1">找到下一个<em className="green italic">同行者</em></LiquidHeading>
+            <p className="sub">岗位都在飞书招聘官网实时更新——点分类直接看对应团队的在招职位。</p>
           </div>
         </div>
 
-        {/* 团队筛选 */}
-        <div className="jobs-head reveal d-1">
-          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
-            <span className="eyebrow" style={{ gap: 6 }}>团队</span>
-            <div className="jobs-filters">
-              {CATEGORIES.map(c => (
-                <button key={c} className={`chip ${cat === c ? "active" : ""}`} onClick={() => setCat(c)}>{c}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* 城市筛选 */}
-        <div className="jobs-head reveal d-1" style={{ marginTop: -12 }}>
-          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center" }}>
-            <span className="eyebrow" style={{ gap: 6 }}>城市</span>
-            <div className="jobs-filters">
-              {LOCATIONS.map(c => (
-                <button key={c} className={`chip ${loc === c ? "active" : ""}`} onClick={() => setLoc(c)}>{c}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="jobs-list reveal d-2">
-          {filtered.map((j, i) => (
-            <JobRow key={j.id} j={j} idx={i} onOpen={onOpen} />
+        {/* 分类标签 → 跳飞书招聘官网（带筛选参数，TODO: 按飞书官网实际参数格式调整） */}
+        <div className="job-cats reveal d-1">
+          {CATEGORIES.map((c) => (
+            <a key={c} className="job-cat" href={RECRUIT_URL} target="_blank" rel="noopener noreferrer">
+              <span className="job-cat-name">{c}</span>
+              <span className="job-cat-arrow">→</span>
+            </a>
           ))}
-          {filtered.length === 0 && (
-            <div style={{ padding: "60px 0", textAlign: "center", color: "var(--fg-3)", fontFamily: "var(--serif)", fontSize: 20 }}>
-              当前筛选下暂时没有空位——但我们一直欢迎主动投递。
-            </div>
-          )}
         </div>
 
       </div>
