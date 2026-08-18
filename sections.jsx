@@ -1,343 +1,285 @@
-/* global React, window, JOBS, CATEGORIES, HERO_STATS, RECRUIT_URL, HERO_VARIANT, Arrow, useCountUp */
+/* global React, window, SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
+// ============ Blacklake Careers v6 · 场景（流动的工厂） ============
 
-const { useState: useS, useMemo: useM, useRef: useR, useEffect: useE } = React;
-
-// ═══════════════════════════════ Hero ═══════════════════════════════
-function Hero({ onPrimary, onSecondary }) {
-  const titleRef = useR(null);
-  const canvasRef = useR(null);
-
-
-  // ── Hero title wave effect: gaussian hill follows mouse X ──
-  useE(() => {
-    const title = titleRef.current;
-    if (!title) return;
-
-    // cx per character (relative to title left edge)
-    let cxCache = null;
-    let mouseX = -9999;
-    let raf2 = null;
-
-    const AMPLITUDE = 26;  // px upward at peak
-    const SIGMA     = 190; // gaussian width (px)
-    const WAVE_K    = 0.018; // cosine ripple freq → wave shape, not just a bump
-
-    const getSpans = () => Array.from(title.querySelectorAll('.hero-char'));
-
-    const cacheX = () => {
-      const rect = title.getBoundingClientRect();
-      cxCache = getSpans().map(s => {
-        const r = s.getBoundingClientRect();
-        return r.left + r.width * 0.5 - rect.left;
-      });
-    };
-
-    let dispY = [], velY = [];
-    const initTimer = setTimeout(() => {
-      cacheX();
-      const n = getSpans().length;
-      dispY = new Array(n).fill(0);
-      velY  = new Array(n).fill(0);
-    }, 350);
-
-    const animate = () => {
-      const spans = getSpans();
-      if (!cxCache || spans.length !== dispY.length) { raf2 = requestAnimationFrame(animate); return; }
-
-      let anyActive = false;
-      spans.forEach((span, i) => {
-        const dx = cxCache[i] - mouseX;
-        // Wave shape: gaussian envelope × cosine → peak at mouse, oscillating tails
-        const target = mouseX > -9000
-          ? -AMPLITUDE * Math.exp(-(dx * dx) / (2 * SIGMA * SIGMA)) * Math.cos(dx * WAVE_K)
-          : 0;
-
-        // Spring-damper toward target
-        velY[i] = velY[i] * 0.80 + (target - dispY[i]) * 0.14;
-        dispY[i] += velY[i];
-
-        if (Math.abs(dispY[i]) > 0.08 || Math.abs(velY[i]) > 0.02) {
-          anyActive = true;
-          span.style.transform = `translateY(${dispY[i].toFixed(1)}px)`;
-        } else {
-          dispY[i] = 0; velY[i] = 0;
-          span.style.transform = '';
-        }
-      });
-
-      if (anyActive || mouseX > -9000) raf2 = requestAnimationFrame(animate);
-      else raf2 = null;
-    };
-
-    const onMove = e => {
-      const r = title.getBoundingClientRect();
-      mouseX = e.clientX - r.left;
-      if (!raf2) raf2 = requestAnimationFrame(animate);
-    };
-    const onLeave = () => { mouseX = -9999; };
-    const onResize = () => setTimeout(cacheX, 80);
-
-    title.addEventListener('mousemove', onMove);
-    title.addEventListener('mouseleave', onLeave);
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      clearTimeout(initTimer);
-      cancelAnimationFrame(raf2);
-      title.removeEventListener('mousemove', onMove);
-      title.removeEventListener('mouseleave', onLeave);
-      window.removeEventListener('resize', onResize);
-    };
-  }, []);
-
+// ═══════════ 00 Prelude：一个工厂每天要做多少判断 ═══════════
+function Prelude({ active, leaving, onSkip }) {
   return (
-    <section className="hero noise" id="top">
-      <div className="wrap">
-        {HERO_VARIANT === 1 && (
-          /* ── 画面 1：使命陈述（纯文字 + 按钮）── */
-          <div className="hero-v1">
-            <div className="eyebrow hero-kicker reveal"><span className="dot" />Blacklake · Industrial AI</div>
-            <h1 className="h-hero hero-title" ref={titleRef}>
-              <span className="line"><span>{'未来十年最大的AI应用'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'不会只发生在互联网'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'而会深入真实世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'重塑制造业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'这一全球最大产业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
-            </h1>
-            <p className="hero-sub reveal">
-              如果你希望参与定义下一代工业 AI 的产品与技术，我们期待与你一起，把想象变成现实。
-            </p>
-            <div className="hero-actions reveal d-1">
-              <button className="btn" onClick={onPrimary}>查看 {JOBS.length} 个在招职位 <Arrow /></button>
-            </div>
-          </div>
-        )}
-
-        {HERO_VARIANT === 2 && (
-          /* ── 画面 2：使命陈述 + 真实数据墙 ── */
-          <div className="hero-v2">
-            <div className="eyebrow hero-kicker reveal"><span className="dot" />Blacklake · Industrial AI</div>
-            <h1 className="h-hero hero-title" ref={titleRef}>
-              <span className="line"><span>{'未来十年最大的AI应用'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'不会只发生在互联网'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'而会深入真实世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'重塑制造业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'这一全球最大产业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
-            </h1>
-            <div className="hero-actions reveal d-1">
-              <button className="btn" onClick={onPrimary}>查看 {JOBS.length} 个在招职位 <Arrow /></button>
-            </div>
-            <div className="hero-meta hero-meta-strong reveal d-2">
-              <OdometerStat value="40,000" suffix="+" label="工厂正在使用黑湖" duration={1800} delay={0} />
-              <OdometerStat value="52.7" suffix="%" label="中国云化 MES 市占率第一" duration={1600} delay={120} />
-              <div className="cell reveal d-3"><div className="k">累计执行任务</div><div className="v">1.6<span className="unit">亿次</span></div></div>
-              <div className="cell reveal d-4"><div className="k">工业 AI 领域</div><div className="v">WEF<span className="unit">入选</span></div></div>
-            </div>
-          </div>
-        )}
-
-        {HERO_VARIANT === 3 && (
-          /* ── 画面 3：使命陈述 + 工业 x AI 合成（数据流注入产线）── */
-          <div className="hero-v3">
-            <div className="eyebrow hero-kicker reveal"><span className="dot" />Blacklake · Industrial AI</div>
-            <h1 className="h-hero hero-title" ref={titleRef}>
-              <span className="line"><span>{'未来十年最大的AI应用'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'不会只发生在互联网'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'而会深入真实世界'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</span></span>
-              <span className="line"><span>{'重塑制造业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}<em>{'这一全球最大产业'.split('').map((c,i)=><span key={i} className="hero-char">{c}</span>)}</em></span></span>
-            </h1>
-            <div className="hero-actions reveal d-1">
-              <button className="btn" onClick={onPrimary}>查看 {JOBS.length} 个在招职位 <Arrow /></button>
-            </div>
-            <div className="hero-flow reveal d-2" aria-hidden="true">
-              <div className="flow-line" />
-              <div className="flow-line flow-line-2" />
-              <div className="flow-line flow-line-3" />
-            </div>
-          </div>
-        )}
+    <section className={`scene prelude ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
+      <div className="prelude-head">
+        <span>FACTORY INPUT / LIVE</span>
+        <span>SHANGHAI · 2026</span>
       </div>
+      <div className="signal-space" aria-hidden="true">
+        <div className="blueprint">
+          <span className="bp-circle bp-one" />
+          <span className="bp-circle bp-two" />
+          <span className="bp-axis bp-axis-x" />
+          <span className="bp-axis bp-axis-y" />
+          <span className="bp-dim dim-one">84.00 ±0.02</span>
+          <span className="bp-dim dim-two">Ø 12 H7</span>
+        </div>
+        {SIGNALS.map((s, i) => (
+          <div className={`signal ${s.cls}`} key={s.kind} style={{ "--i": i }}>
+            <span className="signal-kind">{s.kind}</span>
+            <strong>{s.value}</strong>
+            <small>{s.meta}</small>
+          </div>
+        ))}
+        <div className="conn conn-a" /><div className="conn conn-b" />
+        <div className="conn conn-c" /><div className="conn conn-d" />
+        <div className="core"><i /><span>INTELLIGENCE</span></div>
+      </div>
+      <div className="prelude-copy">
+        <p className="prelude-line line-one">{PRELUDE_LINES[0]}</p>
+        <p className="prelude-line line-two">{PRELUDE_LINES[1]}</p>
+      </div>
+      <button className="skip-intro" onClick={onSkip}>跳过开场 <span>SPACE</span></button>
+      <div className="intro-timeline" aria-hidden="true"><i /><span>INTRO</span></div>
     </section>
   );
 }
 
-// ═══════════════════════════════ About ═══════════════════════════════
-function About() {
+// ═══════════ 01 Hero：让智能进入工厂，产生真实价值 ═══════════
+function Hero({ active, leaving, onExplore, onApply }) {
   return (
-    <section className="section" id="about">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">01</span><span>我们是谁</span></div>
-          </div>
-          <div>
-            <LiquidHeading className="h-1">让<em className="green italic">AI</em>真正帮助工厂决策</LiquidHeading>
-          </div>
+    <section className={`scene hero ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
+      <div className="hero-cad" aria-hidden="true">
+        <span className="hero-ring ring-a" /><span className="hero-ring ring-b" />
+        <span className="hero-axis axis-a" /><span className="hero-axis axis-b" />
+        <span className="hero-tag tag-a">ORDER / #BL-240817</span>
+        <span className="hero-tag tag-b">INTELLIGENCE / ONLINE</span>
+        <span className="hero-tag tag-c">OUTPUT / 生产路径</span>
+        <span className="hero-flow" />
+      </div>
+      <div className="hero-copy">
+        <p className="eyebrow">INTELLIGENCE × MANUFACTURING</p>
+        <h1>让智能进入工厂<br /><span className="sub">产生真实价值</span></h1>
+        <p className="hero-lede">让软件不只记录生产，而开始理解、判断和行动。40,000+ 工厂已经在黑湖的系统里运转——现在，我们要让智能住进去。</p>
+        <div className="hero-actions">
+          <button className="btn" onClick={onExplore}>探索我们在做什么 <span className="arw">↓</span></button>
+          <button className="btn btn-paper" onClick={() => onApply("全部")}>查看开放职位 <span className="arw">↗</span></button>
         </div>
+      </div>
+      <div className="scroll-cue" aria-hidden="true"><span>SCROLL · FOLLOW THE ORDER</span><i /></div>
+    </section>
+  );
+}
 
-        <div className="article reveal d-1">
-          <aside className="side">
-            <div className="corner">
-              <div className="eyebrow" style={{ marginBottom: 12 }}>背景</div>
-              <div style={{ fontFamily: "var(--serif)", fontSize: 17, lineHeight: 1.55, letterSpacing: "-0.01em", color: "var(--fg-2)" }}>
-                中国有数百万中小工厂。它们是制造业的毛细血管，承载着无数就业和产业链的末端环节——但它们几乎是沉默的。
+// ═══════════ 02 One Order：这单，能不能接 ═══════════
+function Order({ active, leaving, prog }) {
+  const resolvedCount = Math.min(4, Math.max(0, Math.ceil(prog * 4.7)));
+  const conv = prog > 0.55;
+  return (
+    <section className={`scene order ${active ? "is-active" : ""} ${leaving ? "leaving" : ""} ${conv ? "conv" : ""}`} aria-hidden={!active}>
+      <div className="order-grid" aria-hidden="true" />
+      <header className="order-heading">
+        <p>ONE ORDER / REAL CONSTRAINTS</p>
+        <h2>这单，<span>能不能接？</span></h2>
+      </header>
+      <article className="ticket">
+        <div className="ticket-top"><span>INCOMING ORDER</span><span>17:42:08</span></div>
+        <strong>{ORDER_TICKET.no}</strong>
+        <p>{ORDER_TICKET.name}</p>
+        <div className="ticket-meta">{ORDER_TICKET.meta.map((m) => <span key={m}>{m}</span>)}</div>
+        <div className="ticket-bar" aria-hidden="true" />
+      </article>
+      <div className="decision-stream stream" aria-label="订单判断过程">
+        {JUDGMENTS.map((j, i) => {
+          const on = i < resolvedCount;
+          return (
+            <div className={`node ${on ? "resolved" : ""}`} key={j.no}>
+              <div className="node-idx">{j.no}</div>
+              <div className="node-copy">
+                <span>{j.label}</span>
+                <strong>{j.value}</strong>
+                <small>{j.detail}</small>
               </div>
+              <div className="node-state"><i />{on ? j.state : "等待判断"}</div>
             </div>
-          </aside>
-
-          <div>
-            <p className="lead drop">
-              过去十年，我们走进车间、跟工人同吃同住，把生产搬上云端，以 <b style={{ color: "var(--fg)" }}>52.7% 的市占率</b>位居中国云化 MES 第一，服务 <b style={{ color: "var(--fg)" }}>40,000+ 家工厂</b>。这给了我们一件 AI 落地最稀缺的东西——真实世界的工业场景。今天，黑湖已经将<b style={{ color: "var(--fg)" }}>工业 AI Agent</b> 送进真实产线，覆盖设计、排程、生产、质检，累计执行任务<b style={{ color: "var(--fg)" }}>超 1.6 亿次</b>，并入选世界经济论坛首批全球 AI 产业化标杆——工业 AI 领域唯一的中国面孔。
-            </p>
-          </div>
+          );
+        })}
+      </div>
+      <div className="smart" aria-hidden={!conv}>
+        <div className="smart-in">
+          {SMART_IN.map((s) => <div key={s}>{s}</div>)}
         </div>
+        <div className="smart-core"><i /></div>
+        <div className="smart-out">
+          {SMART_OUT.map((s) => <div key={s}>{s}</div>)}
+        </div>
+      </div>
+      <p className="smart-line">{SMART_LINE}</p>
+      <div className={`verdict ${prog > 0.88 ? "resolved" : ""}`}>
+        <span>DECISION / CONFIDENCE 94%</span>
+        <strong>可以接。</strong>
+        <p>已生成生产路径 · 主要风险：阳极氧化产能窗口</p>
+      </div>
+      <div className="order-progress" aria-hidden="true">
+        <span>ORDER</span>
+        <div><i style={{ width: `${Math.max(6, prog * 100)}%` }} /></div>
+        <span>DECISION</span>
+      </div>
+      <p className="order-note">继续滚动，让判断依次发生</p>
+    </section>
+  );
+}
+
+// ═══════════ 04 Impact：模型里的答案不是终点 ═══════════
+function Impact({ active, leaving }) {
+  return (
+    <section className={`scene impact ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
+      <header className="impact-head">
+        <p>IMPACT / REAL WORLD</p>
+        <h2>模型里的答案，不是终点。<br /><span>工厂里发生改变，才是。</span></h2>
+      </header>
+      <div className="impact-morph" aria-hidden="true">
+        <span>CAD LINE</span><span>→</span><span>CUT PATH</span><span>→</span><span>METAL</span>
+        <span className="mline" />
+      </div>
+      <div className="impact-shots">
+        {IMPACT_SHOTS.map((s, i) => (
+          <figure className={`shot shot-${["a", "b", "c"][i]}`} key={s.img}>
+            <div className="frame"><img src={s.img} alt={s.alt} /></div>
+            <figcaption>
+              <span className="cap">{s.cap}</span>
+              <span className="read">{s.read}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <p className="impact-line">你写的一行代码、一个模型、一个产品判断，<b>最终会进入一条真实的产线。</b></p>
+    </section>
+  );
+}
+
+// ═══════════ 05 Frontier：很多问题，还没有答案 ═══════════
+function Frontier({ active, leaving, onHire }) {
+  const [conf, setConf] = useS(94);
+  useE(() => {
+    if (!active) return;
+    setConf(94);
+    const t0 = Date.now();
+    const t = setInterval(() => {
+      const p = Math.min(1, (Date.now() - t0) / 750);
+      setConf(Math.round(94 - 43 * p));
+      if (p >= 1) clearInterval(t);
+    }, 40);
+    return () => clearInterval(t);
+  }, [active]);
+  return (
+    <section className={`scene frontier ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
+      <header className="frontier-head">
+        <p>FRONTIER / OPEN QUESTIONS</p>
+        <h2>很多问题，<span>还没有答案。</span></h2>
+      </header>
+      <div className="fork" aria-hidden="true">
+        <span className="conf">CONFIDENCE <b>{conf}%</b></span>
+        <span className="fork-lines" />
+        <span>FLOW DIVERGES</span>
+      </div>
+      <div>
+        {QUESTIONS.map((q, i) => (
+          <div className="q-row" key={q.q}>
+            <span className="q-idx">0{i + 1}</span>
+            <p className="q-text">{q.q}</p>
+            <button className="q-link" onClick={() => onHire(q.cat)}>
+              {q.tag} · WE ARE HIRING <span>↗</span>
+            </button>
+          </div>
+        ))}
+      </div>
+      <p className="frontier-note">前面你是观众。从这里开始，你可能是一起解决这些问题的人。</p>
+    </section>
+  );
+}
+
+// ═══════════ 07 Jobs：你想进入哪一段 ═══════════
+function JobsScene({ active, leaving, onNode }) {
+  return (
+    <section className={`scene jobs-scene ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
+      <header className="jobs-head">
+        <p>JOBS / FIND WHERE YOU FIT</p>
+        <h2>这个系统里，<span>哪一部分是你想参与构建的？</span></h2>
+      </header>
+      <div className="sysflow" aria-hidden="true">
+        {SYSTEM_FLOW.map((n, i) => (
+          <React.Fragment key={n}>
+            {i > 0 && <span className="sf-line" />}
+            <span className={`sf-node ${n === "INTELLIGENCE" ? "core-node" : ""}`}>{n}</span>
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="job-nodes">
+        {JOB_NODES.map((n) => {
+          const count = JOBS.filter((j) => j.category === n.cat).length;
+          return (
+            <button className="job-node" key={n.cat} onClick={() => onNode(n.cat)}>
+              <span className="jn-en">{n.en}</span>
+              <span className="jn-cat">{n.cat}</span>
+              <span className="jn-note">{n.note}</span>
+              <span className="jn-meta">
+                <span className="jn-count">{count} 个开放岗位</span>
+                <span className="jn-go">进入 ↗</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="jobs-foot">
+        <a href="mailto:careers@blacklake.cn">careers@blacklake.cn →</a>
+        <span>© 2026 黑湖科技 BLACKLAKE</span>
       </div>
     </section>
   );
 }
 
-// ─── BigMark scroll-reveal ───────────────────────────────────────────────────
-function BigMarkReveal() {
-  const ref = useR(null);
-  const [prog, setProg] = useS(0);
-  useE(() => {
-    const update = () => {
-      const el = ref.current; if (!el) return;
-      const r = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const p = (vh * 0.85 - r.top) / (r.height + vh * 0.35);
-      setProg(Math.max(0, Math.min(1, p)));
-    };
-    window.addEventListener('scroll', update, { passive: true });
-    update();
-    return () => window.removeEventListener('scroll', update);
-  }, []);
-  const lit = (n, total) => prog >= n / total;
+// ═══════════ 职位抽屉：纸的反转，30 秒可投递 ═══════════
+function JobsDrawer({ open, filter, onFilter, onClose }) {
+  const counts = {};
+  JOBS.forEach((j) => { counts[j.category] = (counts[j.category] || 0) + 1; });
+  const list = filter === "全部" ? JOBS : JOBS.filter((j) => j.category === filter);
   return (
-    <div ref={ref} className="bigmark">
-      <span style={{ display: 'block' }}>
-        <span className={`bm-word${lit(1,5)?' bm-lit':''}`}>每一行</span>
-        <span className={`bm-word bm-em${lit(2,5)?' bm-lit':''}`}>代码</span>
-        <span className={`bm-word${lit(2,5)?' bm-lit':''}`}>，</span>
-      </span>
-      <span style={{ display: 'block', marginTop: 8 }}>
-        <span className={`bm-word${lit(3,5)?' bm-lit':''}`}>都落在</span>
-        <span className={`bm-word bm-em${lit(4,5)?' bm-lit':''}`}>真实</span>
-        <span className={`bm-word${lit(5,5)?' bm-lit':''}`}>的车间。</span>
-      </span>
-    </div>
-  );
-}
-
-// ═══════════════════════════════ Jobs ═══════════════════════════════
-// ═══════════════════════════════ Jobs (分类标签 → 飞书招聘官网) ═══════════════════════════════
-function Jobs() {
-  return (
-    <section className="section" id="jobs">
-      <div className="wrap">
-        <div className="sec-head reveal">
+    <React.Fragment>
+      <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="关闭职位列表" tabIndex={-1} />
+      <aside className={`drawer ${open ? "open" : ""}`} aria-hidden={!open} aria-label="开放职位">
+        <div className="drawer-head">
           <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">03</span><span>在招职位</span></div>
+            <span>JOIN BLACK LAKE</span>
+            <h2>加入黑湖</h2>
           </div>
-          <div>
-            <LiquidHeading className="h-1">找到下一个<em className="green italic">同行者</em></LiquidHeading>
-            <p className="sub">岗位都在飞书招聘官网实时更新——点分类直接看对应团队的在招职位。</p>
-          </div>
+          <button className="drawer-close" onClick={onClose}>关闭 ×</button>
         </div>
-
-        {/* 分类标签 → 跳飞书招聘官网（带筛选参数，TODO: 按飞书官网实际参数格式调整） */}
-        <div className="job-cats reveal d-1">
+        <p className="drawer-intro">到真实的制造现场，解决 AI 还没有答案的问题。点击岗位，前往飞书招聘完成投递。</p>
+        <div className="drawer-filters">
+          <button className={filter === "全部" ? "selected" : ""} onClick={() => onFilter("全部")}>
+            全部 {JOBS.length}
+          </button>
           {CATEGORIES.map((c) => (
-            <a key={c} className="job-cat" href={RECRUIT_URL} target="_blank" rel="noopener noreferrer">
-              <span className="job-cat-name">{c}</span>
-              <span className="job-cat-arrow">→</span>
+            <button key={c} className={filter === c ? "selected" : ""} onClick={() => onFilter(c)}>
+              {c} {counts[c] || 0}
+            </button>
+          ))}
+        </div>
+        <div className="drawer-list">
+          {list.map((j, i) => (
+            <a className="djob" key={j.id} href={RECRUIT_URL} target="_blank" rel="noreferrer">
+              <span className="djob-no">{String(i + 1).padStart(2, "0")}</span>
+              <span className="djob-copy">
+                <strong>{j.title}</strong>
+                <small>{j.loc} · {j.category} · {j.type} · {j.level}</small>
+                <p>{j.desc}</p>
+              </span>
+              <span className="djob-arrow">↗</span>
             </a>
           ))}
         </div>
-
-      </div>
-    </section>
+        <p className="drawer-foot">投递入口接入飞书招聘 · 简历直达用人团队</p>
+      </aside>
+    </React.Fragment>
   );
 }
 
-// ═══════════════════════════════ CTA ═══════════════════════════════
-function CTA({ onApply }) {
-  return (
-    <section className="section-sm" id="create-role">
-      <div className="wrap">
-        <div className="cta-block reveal">
-          <div>
-            <div className="eyebrow" style={{ color: "var(--fg-4)", marginBottom: 24 }}>
-              <span className="dot" /><span className="num">04</span><span>没有合适的？</span>
-            </div>
-            <h2>那就 <em className="green italic">自己创造</em><br />一个岗位。</h2>
-            <p className="cta-sub">我们相信，对的人比对的岗位更重要。<br/>如果上面的列表里没有让你心动的，告诉我们你想做什么——把简历、作品、一段话砸过来。</p>
-          </div>
-          <div className="cta-actions">
-            <a className="btn btn-ghost" href="mailto:careers@blacklake.cn?subject=我想为黑湖创造一个岗位">写信告诉我们</a>
-            <button className="btn" onClick={onApply}>再看一眼职位 <Arrow /></button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════ Footer ═══════════════════════════════
-function Footer() {
-  return (
-    <footer className="foot" id="contact">
-      <div className="wrap">
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "end",
-          gap: 48,
-          paddingBlock: "32px 24px",
-        }}>
-          <div>
-            <div className="logo" style={{ marginBottom: 24 }}>
-              <img src="logo.png" alt="Heihu" className="logo-img" />
-            </div>
-            <div style={{
-              fontFamily: "var(--mono)",
-              fontSize: 12,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "var(--fg-3)",
-              lineHeight: 2,
-            }}>
-              <div>SHANGHAI · 31°12'N 121°28'E</div>
-              <div>SINGAPORE · 1°17'N 103°51'E</div>
-            </div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <a
-              href="mailto:careers@blacklake.cn"
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: 28,
-                color: "var(--fg)",
-                textDecoration: "none",
-                borderBottom: "1px solid var(--line-2)",
-                paddingBottom: 4,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              careers@blacklake.cn <Arrow />
-            </a>
-          </div>
-        </div>
-        <div className="foot-bot" style={{ marginTop: 56 }}>
-          <div>© 2026 黑湖网络科技 · Black Lake Technologies</div>
-          <div style={{ fontFamily: "var(--mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fg-3)" }}>
-            </div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ═══════════════════════════════ OEE Mini-game (Easter Egg) ═══════════════════════════════
-// Job categories + machine specializations
+// ═══════════ OEE Mini-game (Easter Egg · 三连击 logo 触发) ═══════════
 const OEE_CAT = {
   assembly: { label: '装配·排产', color: '#02B980' },
   ai:       { label: 'AI·数据',   color: '#40D898' },
@@ -368,7 +310,6 @@ const OEE_JOBS_DEF = [
   { name: '供应商质检审核', dur: 12, u: 0, cat: 'quality'  },
   { name: '一次通过率统计', dur: 6,  u: 1, cat: 'quality'  },
 ];
-// match → { dur multiplier, points, label, color }
 const OEE_MATCH = {
   perfect: { mul: 1.0, pts: 3, label: '完美匹配', color: '#02B980' },
   ok:      { mul: 1.6, pts: 2, label: '勉强可做', color: '#028A5A' },
@@ -409,14 +350,12 @@ function OEEGame() {
     setMachines(OEE_MACH_DEF.map((d, i) => ({ ...d, i, job: null, progress: 0 })));
   }
 
-  // Countdown
   useE(() => {
     if (!active || ended) return;
     const t = setInterval(() => setTimeLeft(v => { if (v <= 1) { setEnded(true); return 0; } return v - 1; }), 1000);
     return () => clearInterval(t);
   }, [active, ended]);
 
-  // Job spawner
   useE(() => {
     if (!active || ended) return;
     const spawn = () => {
@@ -430,19 +369,16 @@ function OEEGame() {
     return () => clearInterval(t);
   }, [active, ended]);
 
-  // Machine progress + expiry tick
   useE(() => {
     if (!active || ended) return;
     const t = setInterval(() => {
       const now = Date.now();
       setNow(now);
-      // expire queue
       setQueue(q => {
         const gone = q.filter(j => now > j.expireAt);
         if (gone.length) setStats(s => ({ ...s, missed: s.missed + gone.length }));
         return q.filter(j => now <= j.expireAt);
       });
-      // machine progress
       setMachines(ms => ms.map(m => {
         if (!m.job) return m;
         const p = Math.min((now - m.job.startedAt) / 1000 / m.job.effDur, 1);
@@ -474,7 +410,6 @@ function OEEGame() {
     <div className="oee-overlay" onClick={e => e.target === e.currentTarget && setActive(false)}>
       <div className="oee-modal">
 
-        {/* Header */}
         <div className="oee-head">
           <div className="oee-title"><span className="oee-logo-dot" /><span>DISPATCH · SYS</span><span className="oee-badge">● ONLINE</span></div>
           <div className="oee-legend">
@@ -502,9 +437,8 @@ function OEEGame() {
         ) : (
           <div className="oee-body">
 
-            {/* Job queue */}
             <div className="oee-queue">
-              <div className="oee-col-label">INCOMING <span style={{ color: '#3A1A06' }}>{queue.length}/{OEE_MAX_Q}</span></div>
+              <div className="oee-col-label">INCOMING {queue.length}/{OEE_MAX_Q}</div>
               {queue.length === 0 && <div className="oee-empty">AWAITING INPUT...</div>}
               {queue.map(j => {
                 const cc = OEE_CAT[j.cat];
@@ -528,7 +462,6 @@ function OEEGame() {
               })}
             </div>
 
-            {/* Machines */}
             <div className="oee-machines">
               <div className="oee-col-label">WORK CELLS</div>
               <div className="oee-machine-grid">
@@ -571,7 +504,7 @@ function OEEGame() {
                 <div className="oee-hint">
                   <span className="oee-cat-dot" style={{ background: OEE_CAT[selected.cat]?.color }} />
                   已选：<b>{selected.name}</b>
-                  <span style={{ color: '#021A0C', marginLeft: 8 }}>完美匹配 +3pt · 勉强可做 +2pt · 不擅长 +1pt</span>
+                  <span style={{ opacity: 0.6, marginLeft: 8 }}>完美匹配 +3pt · 勉强可做 +2pt · 不擅长 +1pt</span>
                 </div>
               )}
             </div>
@@ -579,33 +512,14 @@ function OEEGame() {
         )}
 
         <div className="oee-foot">
-          <span>完成 <b style={{ color: '#02B980', textShadow: '0 0 8px rgba(2,185,128,0.55)' }}>{stats.done}</b></span>
+          <span>完成 <b style={{ color: '#02B980' }}>{stats.done}</b></span>
           <span>错过 <b style={{ color: '#7A2808' }}>{stats.missed}</b></span>
-          <span>得分 <b style={{ color: '#028A5A' }}>{stats.pts}</b><span style={{ color: '#021A0C' }}>/{stats.maxPts}</span></span>
-          <span className="oee-oee">OEE <b style={{ color: oee >= 70 ? '#02B980' : oee >= 40 ? '#028A5A' : '#7A2808', textShadow: oee >= 70 ? '0 0 8px rgba(2,185,128,0.5)' : 'none' }}>{oee}%</b></span>
+          <span>得分 <b style={{ color: '#028A5A' }}>{stats.pts}</b><span style={{ opacity: 0.5 }}>/{stats.maxPts}</span></span>
+          <span className="oee-oee">OEE <b style={{ color: oee >= 70 ? '#02B980' : oee >= 40 ? '#028A5A' : '#7A2808' }}>{oee}%</b></span>
         </div>
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════ Manifesto (Hedge-fund minimal) ═════════════
-function Manifesto() {
-  return (
-    <section className="section" id="manifesto">
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="eyebrow"><span className="dot" /><span className="num">02</span><span>Belief</span></div>
-          </div>
-          <div />
-        </div>
-        <div style={{ marginTop: 32 }}>
-          <BigMarkReveal />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-Object.assign(window, { Hero, About, Jobs, CTA, Footer, Manifesto, OEEGame });
+Object.assign(window, { Prelude, Hero, Order, Impact, Frontier, JobsScene, JobsDrawer, OEEGame });

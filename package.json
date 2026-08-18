@@ -1,0 +1,8 @@
+{
+  "name": "blacklake-careers-preview",
+  "private": true,
+  "description": "Pure static site; serve.mjs is only a local preview helper (no build).",
+  "scripts": {
+    "dev": "node serve.mjs"
+  }
+}

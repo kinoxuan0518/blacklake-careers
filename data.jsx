@@ -1,5 +1,5 @@
 /* global window */
-// ============ Heihu Careers v2 · 数据 ============
+// ============ Blacklake Careers v6 · 数据（流动的工厂） ============
 
 const JOBS = [
   { id: "ai-001", title: "工业大模型应用工程师", team: "AI · 工业大模型", category: "AI · 算法", loc: "上海", type: "全职", level: "P6-P7",
@@ -40,24 +40,83 @@ const JOBS = [
     req: ["每周 4 天起，持续 3 个月以上", "ML / NLP / CV 功底扎实，有项目或论文经历", "对工业 AI 真实落地有好奇心"] },
 ];
 
-// ── 飞书招聘官网（B 方案：岗位全在飞书，站内只留分类标签跳转）──
+// ── 飞书招聘官网（岗位全在飞书，站内点击跳转）──
 const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: 替换为真实飞书招聘官网地址
 
-// ── Hero 画面切换（1=使命陈述 / 2=真实数据墙 / 3=工业xAI合成）──
-const HERO_VARIANT = 2;
-
-// ── 使命文案 ──
-const MISSION_LINES = ["未来十年最大的 AI 应用，", "不会只发生在互联网，", "而会深入真实世界，", "重塑制造业这一全球最大的产业。"];
-
 const CATEGORIES = ["AI · 算法", "产品", "工程", "解决方案", "交付", "实习 / 校招"];
-const LOCATIONS = ["全部城市", "上海", "深圳", "广州", "苏州 / 常州", "新加坡", "远程"];
 
-// ── Hero 统计数据（来自宣传资料） ──
-const HERO_STATS = [
-  { k: "服务工厂", v: "40000", unit: "+", countUp: true },
-  { k: "SaaS MES 市占率", v: "52.7", unit: "%", countUp: true },
-  { k: "办公室", v: "5", unit: "", countUp: false },
-  { k: "成立于", v: "2016", unit: "", countUp: false },
+// ── 章节坐标（Tab = 快速跃迁，看到同一个空间）──
+const CHAPTERS = [
+  { key: "hero",     label: "INTELLIGENCE" },
+  { key: "order",    label: "ONE ORDER" },
+  { key: "impact",   label: "IMPACT" },
+  { key: "frontier", label: "FRONTIER" },
+  { key: "jobs",     label: "JOBS" },
 ];
 
-Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS, RECRUIT_URL, HERO_VARIANT, MISSION_LINES });
+// ── 00 Prelude：一个工厂每天要做多少判断 ──
+const SIGNALS = [
+  { kind: "ORDER",    value: "#BL-240817", meta: "精密支架 × 200",   cls: "sg-order" },
+  { kind: "DRAWING",  value: "BRKT-A17-R3", meta: "REV 03 / 14.2 MB", cls: "sg-drawing" },
+  { kind: "MATERIAL", value: "AL 6061-T6",  meta: "库存 286 KG",      cls: "sg-material" },
+  { kind: "DELIVERY", value: "72 H",        meta: "08 / 23 · 18:00",  cls: "sg-delivery" },
+  { kind: "MACHINE",  value: "CNC · A17",   meta: "可用率 86.4%",     cls: "sg-machine" },
+  { kind: "PROCESS",  value: "OP 30",       meta: "阳极氧化 / 本色",  cls: "sg-process" },
+];
+const PRELUDE_LINES = [
+  "每一个订单背后，都是一连串判断。",
+  "我们正在让智能参与其中。",
+];
+
+// ── 02 One Order：这单，能不能接 ──
+const ORDER_TICKET = {
+  no: "#BL-240817",
+  name: "新能源汽车电驱壳体支架",
+  meta: ["200 PCS", "72 H", "REV 03"],
+};
+const JUDGMENTS = [
+  { no: "01", label: "材料", value: "AL 6061-T6",     detail: "库存覆盖 1.43×",      state: "已识别" },
+  { no: "02", label: "设备", value: "CNC · A17",      detail: "预计占用 11.6h",      state: "已匹配" },
+  { no: "03", label: "工艺", value: "3轴加工 → 阳极", detail: "6 道工序 / 2 次质检", state: "已生成" },
+  { no: "04", label: "交期", value: "72 小时",        detail: "缓冲 8.4h",           state: "可承诺" },
+];
+
+// ── 03 智能节点：判断收拢 → 左入右出 ──
+const SMART_IN = ["图纸", "订单", "工厂数据", "历史经验"];
+const SMART_OUT = ["工艺建议", "设备匹配", "报价", "生产路径"];
+const SMART_LINE = "让软件从记录发生了什么，走向判断接下来该做什么。";
+
+// ── 04 Impact：数字世界 → 真实世界（真实车间抖动影像）──
+const IMPACT_SHOTS = [
+  { img: "assets/dith-mold.png", alt: "模具工装微距：精密型腔与铜套，戴手套的手正在安放零件",
+    cap: "工装就位", read: "工单 BL-2401 · 节拍精确到秒" },
+  { img: "assets/dith-line.png", alt: "灌装产线：瓶装液体在传送带上连续流动",
+    cap: "产线执行", read: "产能 12,000/h · 数据实时回传" },
+  { img: "assets/dith-hall.png", alt: "机加工车间全景：行车、机床与阳光下的通道",
+    cap: "全局闭环", read: "在制工单 36 · 同一张工单" },
+];
+
+// ── 05 Frontier：很多问题，还没有答案（自然投递口）──
+const QUESTIONS = [
+  { q: "一张复杂图纸，模型真的理解了吗？",     tag: "AI RESEARCH",       cat: "AI · 算法" },
+  { q: "老师傅十年的经验，怎么变成系统能力？", tag: "PRODUCT",           cat: "产品" },
+  { q: "现场发生变化，Agent 怎么重新决策？",   tag: "AGENT ENGINEERING", cat: "AI · 算法" },
+  { q: "AI 到底应该建议，还是应该行动？",      tag: "PRODUCT · DESIGN",  cat: "产品" },
+];
+
+// ── 07 Jobs：这个系统里，哪一部分是你想参与构建的 ──
+const JOB_NODES = [
+  { cat: "AI · 算法",   en: "RESEARCH",    note: "在智能节点" },
+  { cat: "工程",        en: "ENGINEERING", note: "在系统节点" },
+  { cat: "产品",        en: "PRODUCT",     note: "在用户和工厂之间" },
+  { cat: "解决方案",    en: "SOLUTIONS",   note: "在行业 know-how 里" },
+  { cat: "交付",        en: "DELIVERY",    note: "在真实产线上" },
+  { cat: "实习 / 校招", en: "INTERN",      note: "在第一线" },
+];
+const SYSTEM_FLOW = ["订单", "图纸", "INTELLIGENCE", "决策", "工厂"];
+
+Object.assign(window, {
+  JOBS, CATEGORIES, RECRUIT_URL, CHAPTERS,
+  SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS,
+  IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW,
+});

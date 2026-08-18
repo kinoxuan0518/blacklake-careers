@@ -1,5 +1,5 @@
 /* global window */
-// ============ Heihu Careers v2 · Data (EN) ============
+// ============ Blacklake Careers v6 · Data (EN · Living Factory) ============
 
 const JOBS = [
   { id: "ai-001", title: "Industrial LLM Application Engineer", team: "AI · Industrial LLM", category: "AI · ML", loc: "Shanghai", type: "Full-time", level: "P6-P7",
@@ -40,16 +40,83 @@ const JOBS = [
     req: ["Available 4+ days/week for 3+ months", "Solid ML / NLP / CV fundamentals, with project or paper experience", "Curious about real-world industrial AI"] },
 ];
 
-const CATEGORIES = ["AI · ML", "Product", "Engineering", "Solutions", "Delivery", "Internship"];
-const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: 替换为真实飞书招聘官网地址
-const LOCATIONS = ["All Cities", "Shanghai", "Shenzhen", "Guangzhou", "Suzhou / Changzhou", "Singapore", "Remote"];
+// ── Feishu hiring portal ──
+const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: replace with the real Feishu hiring URL
 
-// ── Hero Stats ──
-const HERO_STATS = [
-  { k: "Factories Served", v: "40000", unit: "+", countUp: true },
-  { k: "SaaS MES Market Share", v: "52.7", unit: "%", countUp: true },
-  { k: "Offices", v: "5", unit: "", countUp: false },
-  { k: "Founded", v: "2016", unit: "", countUp: false },
+const CATEGORIES = ["AI · ML", "Product", "Engineering", "Solutions", "Delivery", "Internship"];
+
+// ── Chapter coordinates ──
+const CHAPTERS = [
+  { key: "hero",     label: "INTELLIGENCE" },
+  { key: "order",    label: "ONE ORDER" },
+  { key: "impact",   label: "IMPACT" },
+  { key: "frontier", label: "FRONTIER" },
+  { key: "jobs",     label: "JOBS" },
 ];
 
-Object.assign(window, { JOBS, CATEGORIES, LOCATIONS, HERO_STATS, RECRUIT_URL });
+// ── 00 Prelude ──
+const SIGNALS = [
+  { kind: "ORDER",    value: "#BL-240817", meta: "Precision bracket × 200", cls: "sg-order" },
+  { kind: "DRAWING",  value: "BRKT-A17-R3", meta: "REV 03 / 14.2 MB",       cls: "sg-drawing" },
+  { kind: "MATERIAL", value: "AL 6061-T6",  meta: "Stock 286 KG",           cls: "sg-material" },
+  { kind: "DELIVERY", value: "72 H",        meta: "08 / 23 · 18:00",        cls: "sg-delivery" },
+  { kind: "MACHINE",  value: "CNC · A17",   meta: "Available 86.4%",        cls: "sg-machine" },
+  { kind: "PROCESS",  value: "OP 30",       meta: "Anodize / clear",        cls: "sg-process" },
+];
+const PRELUDE_LINES = [
+  "Behind every order, a chain of judgments.",
+  "We're putting intelligence inside it.",
+];
+
+// ── 02 One Order ──
+const ORDER_TICKET = {
+  no: "#BL-240817",
+  name: "EV motor-housing bracket",
+  meta: ["200 PCS", "72 H", "REV 03"],
+};
+const JUDGMENTS = [
+  { no: "01", label: "MATERIAL",  value: "AL 6061-T6",       detail: "Stock covers 1.43×",   state: "IDENTIFIED" },
+  { no: "02", label: "MACHINE",   value: "CNC · A17",        detail: "Occupied est. 11.6h",  state: "MATCHED" },
+  { no: "03", label: "PROCESS",   value: "3-axis → anodize", detail: "6 ops / 2 QC gates",   state: "GENERATED" },
+  { no: "04", label: "DELIVERY",  value: "72 hours",         detail: "Buffer 8.4h",          state: "FEASIBLE" },
+];
+
+// ── 03 Intelligence node: judgments converge — in / out ──
+const SMART_IN = ["DRAWINGS", "ORDERS", "FLOOR DATA", "EXPERIENCE"];
+const SMART_OUT = ["PROCESS PLAN", "MACHINE MATCH", "QUOTE", "PROD. PATH"];
+const SMART_LINE = "Software that recorded what happened — now decides what's next.";
+
+// ── 04 Impact ──
+const IMPACT_SHOTS = [
+  { img: "assets/dith-mold.png", alt: "Macro shot of mold tooling: precision cavity and copper bushings, a gloved hand placing a part",
+    cap: "Tooling set", read: "Order BL-2401 · takt to the second" },
+  { img: "assets/dith-line.png", alt: "Filling line: bottles flowing continuously on the conveyor",
+    cap: "Line running", read: "12,000/h · live data feedback" },
+  { img: "assets/dith-hall.png", alt: "Machine shop panorama: crane, machines, and a sunlit aisle",
+    cap: "Closed loop", read: "36 WIP orders · one shared order" },
+];
+
+// ── 05 Frontier ──
+const QUESTIONS = [
+  { q: "Does the model truly understand a complex drawing?",            tag: "AI RESEARCH",       cat: "AI · ML" },
+  { q: "How does a veteran's decade of experience become capability?",  tag: "PRODUCT",           cat: "Product" },
+  { q: "When the floor changes, how does an agent re-decide?",          tag: "AGENT ENGINEERING", cat: "AI · ML" },
+  { q: "Should AI advise — or should it act?",                          tag: "PRODUCT · DESIGN",  cat: "Product" },
+];
+
+// ── 07 Jobs ──
+const JOB_NODES = [
+  { cat: "AI · ML",     en: "RESEARCH",    note: "at the intelligence node" },
+  { cat: "Engineering", en: "ENGINEERING", note: "at the system node" },
+  { cat: "Product",     en: "PRODUCT",     note: "between users and factories" },
+  { cat: "Solutions",   en: "SOLUTIONS",   note: "inside industry know-how" },
+  { cat: "Delivery",    en: "DELIVERY",    note: "on real production lines" },
+  { cat: "Internship",  en: "INTERN",      note: "on the front line" },
+];
+const SYSTEM_FLOW = ["ORDER", "DRAWING", "INTELLIGENCE", "DECISION", "FACTORY"];
+
+Object.assign(window, {
+  JOBS, CATEGORIES, RECRUIT_URL, CHAPTERS,
+  SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS,
+  IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW,
+});

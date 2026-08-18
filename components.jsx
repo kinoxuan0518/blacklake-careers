@@ -1,413 +1,59 @@
-/* global React, window */
-// ============ Heihu Careers v2 · 组件 ============
+/* global React, window, CHAPTERS */
+// ============ Blacklake Careers v6 · 组件（流动的工厂） ============
+const { useState: useS, useEffect: useE, useRef: useR } = React;
 
-const { useEffect, useRef, useState, useMemo, useCallback } = React;
-
-// ── 页面引用 (动画已由 CSS 处理) ──
-function useReveal() {
-  return useRef(null);
-}
-
-// ── 数字滚动动画 ──
-function useCountUp(end, duration = 1600) {
-  const [val, setVal] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started) { setStarted(true); io.disconnect(); }
-    }, { threshold: 0.3 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [started]);
-
-  useEffect(() => {
-    if (!started) return;
-    const numEnd = parseInt(end, 10);
-    if (isNaN(numEnd)) { setVal(end); return; }
-    let frame;
-    const t0 = performance.now();
-    const tick = (now) => {
-      const p = Math.min((now - t0) / duration, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(numEnd * ease));
-      if (p < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [started, end, duration]);
-
-  return [ref, val];
-}
-
-// ── 顶栏 ──
-function Nav({ onApply }) {
-  const [scrolled, setScrolled] = useState(false);
-  const clickCount = useRef(0);
-  const clickTimer = useRef(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const handleLogoClick = (e) => {
-    e.preventDefault();
-    clickCount.current++;
-    clearTimeout(clickTimer.current);
-    clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 600);
-    if (clickCount.current >= 3) {
-      clickCount.current = 0;
-      window.dispatchEvent(new CustomEvent('oee-game'));
-    } else {
-      if (clickCount.current === 1) {
-        const el = document.getElementById('top');
-        if (el) window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+// ── 顶栏：品牌（单击回 Hero / 三连击触发彩蛋）+ 章节坐标 + 常驻投递口 ──
+function Nav({ scene, onChapter, onApply, lang }) {
+  const clicks = useR({ n: 0, t: 0 });
+  const onBrand = () => {
+    const now = Date.now();
+    const c = clicks.current;
+    c.n = now - c.t < 500 ? c.n + 1 : 1;
+    c.t = now;
+    if (c.n >= 3) {
+      c.n = 0;
+      window.dispatchEvent(new Event("oee-game"));
+      return;
     }
+    onChapter("hero");
   };
-
   return (
-    <nav className="nav" style={scrolled ? { borderBottomColor: "var(--line-2)" } : {}}>
-      <div className="nav-inner">
-        <a href="#top" className="logo" aria-label="Blacklake" onClick={handleLogoClick}>
-          <img src="logo.png" alt="Blacklake" className="logo-img" />
-        </a>
-        <div className="nav-right">
-          <button className="nav-cta" onClick={onApply}>
-            查看所有职位
-            <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" fill="none" strokeWidth="1.2"/></svg>
+    <nav className="topbar" aria-label="主导航">
+      <button className="brand" onClick={onBrand} aria-label="黑湖招聘首页">
+        <img src="logo.png" alt="黑湖科技" />
+        <span>黑湖智造</span>
+        <small>BLACKLAKE · CAREERS</small>
+      </button>
+      <div className="chapter-nav" aria-label="章节">
+        {CHAPTERS.map((c) => (
+          <button
+            key={c.key}
+            className={scene === c.key ? "active" : ""}
+            onClick={() => onChapter(c.key)}
+          >
+            {c.label}
           </button>
-          <a href="index-en.html" className="nav-lang">EN</a>
-        </div>
+        ))}
+      </div>
+      <div className="nav-right">
+        <a className="nav-lang" href={lang === "zh" ? "index-en.html" : "index.html"}>
+          {lang === "zh" ? "EN" : "中文"}
+        </a>
+        <button className="nav-jobs" onClick={() => onApply(lang === "zh" ? "全部" : "All")}>
+          {lang === "zh" ? "查看开放职位" : "OPEN ROLES"} <span className="arw">↗</span>
+        </button>
       </div>
     </nav>
   );
 }
 
-// ── Arrow 图标 ──
-const Arrow = ({ rot = 0, size = 14 }) => (
-  <svg className="arrow" width={size} height={size} viewBox="0 0 14 14" style={{ transform: `rotate(${rot}deg)` }}>
-    <path d="M2 12L12 2M12 2H5M12 2V9" stroke="currentColor" fill="none" strokeWidth="1.3" strokeLinecap="round" />
-  </svg>
-);
-
-// ── 滚动进度条 ──
-function ScrollBar() {
-  const [p, setP] = useState(0);
-  useEffect(() => {
-    const onScroll = () => {
-      const h = document.documentElement;
-      const total = h.scrollHeight - h.clientHeight;
-      setP(total ? (h.scrollTop / total) * 100 : 0);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-  return <div className="scroll-bar"><i style={{ width: `${p}%` }} /></div>;
-}
-
-// ── Flatten JSX children (text + em) into char items ──
-function flattenChildren(children) {
-  const out = [];
-  const pushStr = (str, cls) => {
-    for (const c of str) out.push({ char: c === " " ? "\u00A0" : c, cls });
-  };
-  const walk = (node, cls) => {
-    if (node == null || node === false) return;
-    if (typeof node === "string" || typeof node === "number") {
-      pushStr(String(node), cls);
-    } else if (Array.isArray(node)) {
-      node.forEach(n => walk(n, cls));
-    } else if (React.isValidElement(node)) {
-      const childCls = node.props.className || cls;
-      walk(node.props.children, childCls);
-    }
-  };
-  React.Children.forEach(children, child => walk(child, ""));
-  return out;
-}
-
-// ── Liquid Heading: character spring displacement on mouse hover ──
-function LiquidHeading({ children, className }) {
-  const elRef = useRef(null);
-
-  useEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
-
-    const spans = Array.from(el.querySelectorAll(".bm-char"));
-    const disp = spans.map(() => ({ x: 0, y: 0, vx: 0, vy: 0 }));
-    let posCache = null;
-    let mouse = { x: -9999, y: -9999 };
-    let raf = null;
-
-    const cachePos = () => {
-      const rect = el.getBoundingClientRect();
-      posCache = spans.map(s => {
-        const r = s.getBoundingClientRect();
-        return { x: r.left + r.width * 0.5 - rect.left, y: r.top + r.height * 0.5 - rect.top };
-      });
-    };
-    const cacheTimer = setTimeout(cachePos, 150);
-
-    const animate = () => {
-      if (!posCache) { raf = requestAnimationFrame(animate); return; }
-      let anyActive = false;
-      spans.forEach((span, i) => {
-        const p = posCache[i];
-        const dx = p.x - mouse.x, dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const R = 130, strength = 24;
-        const influence = Math.exp(-(dist * dist) / (2 * R * R)) * strength;
-        const angle = Math.atan2(dy, dx);
-        const tx = Math.cos(angle) * influence;
-        const ty = Math.sin(angle) * influence;
-        const d = disp[i];
-        d.vx = d.vx * 0.74 + (tx - d.x) * 0.19;
-        d.vy = d.vy * 0.74 + (ty - d.y) * 0.19;
-        d.x += d.vx; d.y += d.vy;
-
-        if (Math.abs(d.x) > 0.05 || Math.abs(d.y) > 0.05) {
-          anyActive = true;
-          span.style.transform = `translate(${d.x.toFixed(1)}px,${d.y.toFixed(1)}px) rotate(${(d.x * 0.1).toFixed(1)}deg)`;
-          if (!span.classList.contains("green")) {
-            const mag = Math.min(Math.sqrt(d.x * d.x + d.y * d.y) / strength * 2, 1);
-            span.style.color = `rgb(${Math.round(237+(2-237)*mag*0.65)},${Math.round(235+(185-235)*mag*0.65)},${Math.round(230+(128-230)*mag*0.65)})`;
-          }
-        } else {
-          d.x = 0; d.y = 0; d.vx = 0; d.vy = 0;
-          span.style.transform = "";
-          if (!span.classList.contains("green")) span.style.color = "";
-        }
-      });
-      if (anyActive || mouse.x > -9000) raf = requestAnimationFrame(animate);
-      else raf = null;
-    };
-
-    const onMove = e => {
-      const r = el.getBoundingClientRect();
-      mouse = { x: e.clientX - r.left, y: e.clientY - r.top };
-      if (!raf) raf = requestAnimationFrame(animate);
-    };
-    const onLeave = () => { mouse = { x: -9999, y: -9999 }; };
-
-    el.addEventListener("mousemove", onMove);
-    el.addEventListener("mouseleave", onLeave);
-    const onResize = () => setTimeout(cachePos, 80);
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      clearTimeout(cacheTimer);
-      cancelAnimationFrame(raf);
-      el.removeEventListener("mousemove", onMove);
-      el.removeEventListener("mouseleave", onLeave);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
-  // ── Scroll-in: chars blur-fade up on viewport entry ──
-  useEffect(() => {
-    const el = elRef.current;
-    if (!el) return;
-    const spans = Array.from(el.querySelectorAll('.bm-char'));
-    spans.forEach((s, i) => s.style.setProperty('--ci', i));
-    el.classList.add('lh-pending');
-    const io = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      el.classList.remove('lh-pending');
-      el.classList.add('lh-revealed');
-      io.disconnect();
-    }, { threshold: 0.15 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const items = flattenChildren(children);
+// ── 画框四角刻线 ──
+function FrameCorners() {
   return (
-    <h2 ref={elRef} className={className}>
-      {items.map((item, i) => (
-        <span key={i} className={`bm-char${item.cls ? " " + item.cls : ""}`}>{item.char}</span>
-      ))}
-    </h2>
-  );
-}
-
-// ── Odometer Stat (canvas drum-roll digits, with glitch-scramble pre-phase) ──
-function OdometerStat({ value, suffix, label, duration = 1900, delay = 0 }) {
-  const wrapRef = useRef(null);
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-    let raf;
-
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      setTimeout(scramble, delay);
-    }, { threshold: 0.3 });
-
-    function scramble() {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      const ctx = canvas.getContext('2d');
-      const fs = Math.round(Math.min(Math.max(28, window.innerWidth * 0.03), 40));
-      const FONT = `600 ${fs * dpr}px "IBM Plex Mono", monospace`;
-      ctx.font = FONT;
-      const chars = (value + (suffix || '')).split('');
-      const isNum = c => c >= '0' && c <= '9';
-      const cw = chars.map(c => ctx.measureText(isNum(c) ? '0' : c).width);
-      const totalW = cw.reduce((a, b) => a + b, 0);
-      const H = fs * dpr * 1.28;
-      canvas.width = Math.ceil(totalW);
-      canvas.height = Math.ceil(H);
-      canvas.style.width = `${Math.ceil(totalW / dpr)}px`;
-      canvas.style.height = `${Math.ceil(H / dpr)}px`;
-
-      const SCRAMBLE_DUR = 480;
-      let raf2, start2 = null;
-      const glyphPool = '0123456789ABCDEF#@!%';
-
-      const scrambleTick = (ts) => {
-        if (!start2) start2 = ts;
-        const elapsed = ts - start2;
-        const progress = elapsed / SCRAMBLE_DUR;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = FONT;
-        ctx.textBaseline = 'middle';
-        let x = 0;
-        chars.forEach((c, i) => {
-          const w = cw[i];
-          if (isNum(c)) {
-            const rg = glyphPool[Math.floor(Math.random() * glyphPool.length)];
-            const alpha = 0.25 + Math.random() * 0.5;
-            // near end of scramble, flash brighter
-            const boost = progress > 0.75 ? (progress - 0.75) * 4 : 0;
-            ctx.fillStyle = `rgba(2,185,128,${Math.min(1, alpha + boost)})`;
-            ctx.fillText(rg, x, H * 0.5);
-          } else {
-            const isAccent = c === '+' || c === '%';
-            ctx.fillStyle = isAccent ? 'rgba(2,185,128,0.45)' : 'rgba(140,136,128,0.4)';
-            ctx.fillText(c, x, H * 0.5);
-          }
-          x += w;
-        });
-        if (elapsed < SCRAMBLE_DUR) {
-          raf2 = requestAnimationFrame(scrambleTick);
-        } else {
-          cancelAnimationFrame(raf2);
-          run();
-        }
-      };
-      raf2 = requestAnimationFrame(scrambleTick);
-    }
-    io.observe(wrap);
-
-    function run() {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      const ctx = canvas.getContext("2d");
-
-      // Match CSS: clamp(28px, 3vw, 40px) Fraunces
-      const fs = Math.round(Math.min(Math.max(28, window.innerWidth * 0.03), 40));
-      const FONT = `600 ${fs * dpr}px "Fraunces", "Noto Serif SC", serif`;
-      ctx.font = FONT;
-
-      const chars = (value + (suffix || "")).split("");
-      const isNum = c => c >= "0" && c <= "9";
-      const cw = chars.map(c => ctx.measureText(isNum(c) ? "0" : c).width);
-      const totalW = cw.reduce((a, b) => a + b, 0);
-      const H = fs * dpr * 1.28;
-
-      canvas.width = Math.ceil(totalW);
-      canvas.height = Math.ceil(H);
-      canvas.style.width = `${Math.ceil(totalW / dpr)}px`;
-      canvas.style.height = `${Math.ceil(H / dpr)}px`;
-
-      ctx.font = FONT;
-      ctx.textBaseline = "middle";
-
-      // spring-ish ease (slight overshoot at the end)
-      const ease = t => {
-        const c1 = 1.45, c3 = c1 + 1;
-        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-      };
-
-      const digitIdxs = chars.reduce((acc, c, i) => isNum(c) ? [...acc, i] : acc, []);
-      let start = null;
-
-      const tick = ts => {
-        if (!start) start = ts;
-        const elapsed = ts - start;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        let x = 0;
-        chars.forEach((c, i) => {
-          const w = cw[i];
-          if (isNum(c)) {
-            const target = parseInt(c, 10);
-            const rank = digitIdxs.indexOf(i);
-            const t = Math.min(Math.max(elapsed - rank * 50, 0) / duration, 1);
-            const ep = ease(t);
-            const yOff = -ep * target * H;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(x, 0, w + 1, canvas.height);
-            ctx.clip();
-
-            for (let d = 0; d <= 9; d++) {
-              const dy = yOff + d * H + H * 0.5;
-              if (dy < -H || dy > H * 2) continue;
-              const dist = Math.abs(d - ep * target);
-              // target digit brightens as animation finishes
-              const alpha = d === target
-                ? 0.3 + Math.min(t * 1.4, 0.7)
-                : Math.max(0, 0.55 - dist * 0.16);
-              ctx.fillStyle = `rgba(237,235,230,${alpha.toFixed(2)})`;
-              ctx.fillText(String(d), x, dy);
-            }
-            ctx.restore();
-          } else {
-            // static chars: comma/dot dim; + and % green
-            const isAccent = c === "+" || c === "%";
-            const a = Math.min(elapsed / 600, 1);
-            ctx.fillStyle = isAccent
-              ? `rgba(2,185,128,${(a * 0.85).toFixed(2)})`
-              : `rgba(140,136,128,${(a * 0.8).toFixed(2)})`;
-            ctx.fillText(c, x, H * 0.5);
-          }
-          x += w;
-        });
-
-        if (elapsed < duration + digitIdxs.length * 50 + 100) {
-          raf = requestAnimationFrame(tick);
-        }
-      };
-
-      raf = requestAnimationFrame(tick);
-    }
-
-    return () => { io.disconnect(); cancelAnimationFrame(raf); };
-  }, [value, suffix, duration, delay]);
-
-  return (
-    <div ref={wrapRef} className="cell reveal">
-      <div className="k">{label}</div>
-      <div className="v" style={{ overflow: "visible", lineHeight: 1 }}>
-        <canvas ref={canvasRef} style={{ display: "block" }} />
-      </div>
+    <div className="frame-corners" aria-hidden="true">
+      <i /><i /><i /><i />
     </div>
   );
 }
 
-Object.assign(window, { Nav, Arrow, ScrollBar, useReveal, useCountUp, OdometerStat, LiquidHeading });
+Object.assign(window, { Nav, FrameCorners });
