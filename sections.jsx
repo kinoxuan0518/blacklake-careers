@@ -1,125 +1,433 @@
-/* global React, window, SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
+/* global React, window, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
 // ============ Blacklake Careers v6 · 场景（流动的工厂） ============
 
-// ═══════════ 00 Prelude：一个工厂每天要做多少判断 ═══════════
-function Prelude({ active, leaving, onSkip }) {
-  return (
-    <section className={`scene prelude ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
-      <div className="prelude-head">
-        <span>FACTORY INPUT / LIVE</span>
-        <span>SHANGHAI · 2026</span>
-      </div>
-      <div className="signal-space" aria-hidden="true">
-        <div className="blueprint">
-          <span className="bp-circle bp-one" />
-          <span className="bp-circle bp-two" />
-          <span className="bp-axis bp-axis-x" />
-          <span className="bp-axis bp-axis-y" />
-          <span className="bp-dim dim-one">84.00 ±0.02</span>
-          <span className="bp-dim dim-two">Ø 12 H7</span>
-        </div>
-        {SIGNALS.map((s, i) => (
-          <div className={`signal ${s.cls}`} key={s.kind} style={{ "--i": i }}>
-            <span className="signal-kind">{s.kind}</span>
-            <strong>{s.value}</strong>
-            <small>{s.meta}</small>
-          </div>
-        ))}
-        <div className="conn conn-a" /><div className="conn conn-b" />
-        <div className="conn conn-c" /><div className="conn conn-d" />
-        <div className="core"><i /><span>INTELLIGENCE</span></div>
-      </div>
-      <div className="prelude-copy">
-        <p className="prelude-line line-one">{PRELUDE_LINES[0]}</p>
-        <p className="prelude-line line-two">{PRELUDE_LINES[1]}</p>
-      </div>
-      <button className="skip-intro" onClick={onSkip}>跳过开场 <span>SPACE</span></button>
-      <div className="intro-timeline" aria-hidden="true"><i /><span>INTRO</span></div>
-    </section>
-  );
-}
+// ═══════════ 00–01 Hero：绿灯点火 → 信号收拢 → 伺服电机装配 → 上滑拆解 ═══════════
+const HM_LABELS = [
+  { from: [782, 177],  elbow: [700, 64],   to: [620, 64],   text: "HOUSING · ", zh: "工单 BL-240817",  d: 0 },
+  { from: [938, 320],  elbow: [920, 190],  to: [920, 140],  text: "STATOR · ",  zh: "材料 AL 6061-T6", d: 0.12 },
+  { from: [1039, 432], elbow: [1100, 330], to: [1100, 270], text: "ROTOR · ",   zh: "公差 ±0.02",      d: 0.18 },
+  { from: [1141, 606], elbow: [1080, 670], to: [1010, 710], text: "BEARING · ", zh: "设备 CNC A17",    d: 0.24 },
+  { from: [548, 178],  elbow: [500, 480],  to: [500, 690],  text: "END CAP · ", zh: "72 H 交期",       d: 0.3 },
+];
+const HM_SIG_TAGS = ["ORDER #BL-240817", "DRAWING BRKT-A17-R3", "MATERIAL AL 6061-T6",
+                     "DELIVERY 72 H", "MACHINE CNC · A17", "PROCESS OP 30"];
+const HM_T = { blink: 0.9, ignite: 1.3, field: 1.9 };
+const HM_KNOTS = [[HM_T.field, 0], [2.7, 0.10], [4.8, 0.80], [5.6, 1.0]];
+const HM_HINT_AUTO = "AUTO · ASSEMBLE · SPACE 跳过";
+const HM_HINT_ASSEMBLED = "SCROLL ↓ 继续 · ↑ 拆解";
+const HM_HINT_MID = "SCROLL ↓ 装回 · ↑ 拆解";
+const HM_HINT_SCATTERED = "SCROLL ↓ 重新装回";
 
-// ═══════════ 01 Hero：让智能进入工厂，产生真实价值 ═══════════
-function Hero({ active, leaving, onExplore, onApply }) {
+function Hero({ active, leaving, onExplore, onApply, mobile, lockedRef }) {
+  const secRef = useR(null);
+  const svgRef = useR(null);
+  const sigBoxRef = useR(null);
+  const cntRef = useR(null);
+  const okRef = useR(null);
+  const hintRef = useR(null);
+  const st = useR(null);
+  const activeRef = useR(active); activeRef.current = active;
+  const mobileRef = useR(mobile); mobileRef.current = mobile;
+  const exploreRef = useR(onExplore); exploreRef.current = onExplore;
+
+  // —— 构建工程图 + 信号场 + 状态机（一次性；layout effect 保证首帧已带 cine，不闪文案） ——
+  useL(() => {
+    const sec = secRef.current, svg = svgRef.current, sigBox = sigBoxRef.current;
+    sec.classList.add("cine"); // 先遮蔽再读布局：clientWidth 会强制样式计算，否则首帧闪文案
+    const NS = "http://www.w3.org/2000/svg";
+    const U = { x: -0.78, y: -0.63 }, P = { x: 0.63, y: -0.78 };
+    const mk = (tag, attrs, parent) => {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      (parent || svg).appendChild(el); return el;
+    };
+    const line = (x1, y1, x2, y2, cls, parent) => mk("line", { x1, y1, x2, y2, "class": cls }, parent);
+    const circ = (cx, cy, r, cls, parent) => mk("circle", { cx, cy, r, "class": cls }, parent);
+    const axis = (c, k) => [c[0] + U.x * k, c[1] + U.y * k];
+    function barrel(g, c, r, len, cls, dim) {
+      const b = axis(c, len);
+      circ(b[0], b[1], r, dim ? "wire-dim" : "wire-soft", g);
+      line(c[0] + P.x * r, c[1] + P.y * r, b[0] + P.x * r, b[1] + P.y * r, cls, g);
+      line(c[0] - P.x * r, c[1] - P.y * r, b[0] - P.x * r, b[1] - P.y * r, cls, g);
+      circ(c[0], c[1], r, cls, g);
+    }
+    function boltCircle(g, c, R, n, r, cls) {
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2;
+        circ(c[0] + Math.cos(a) * R, c[1] + Math.sin(a) * R, r, cls, g);
+      }
+    }
+    function centerMark(g, c, r) {
+      line(c[0] - r - 8, c[1], c[0] + r + 8, c[1], "cmark", g);
+      line(c[0], c[1] - r - 8, c[0], c[1] + r + 8, "cmark", g);
+    }
+
+    /* — 零件布局 — */
+    const FRONT = [1250, 660];
+    const at = (k) => axis(FRONT, k);
+    line(...at(-70), ...at(1000), "cline");
+    const PARTS = [
+      { id: "shaft",    k: 40,  c: at(40),  ex: 250, w0: .10, w1: .26 },
+      { id: "rotor",    k: 270, c: at(270), ex: 300, w0: .16, w1: .34 },
+      { id: "bearingF", k: 140, c: at(140), ex: 380, w0: .24, w1: .42 },
+      { id: "bearingR", k: 780, c: at(780), ex: 420, w0: .26, w1: .44 },
+      { id: "stator",   k: 400, c: at(400), ex: 480, w0: .34, w1: .54 },
+      { id: "housing",  k: 600, c: at(600), ex: 540, w0: .42, w1: .62 },
+      { id: "capF",     k: 0,   c: at(0),   ex: 620, w0: .52, w1: .72 },
+      { id: "capR",     k: 900, c: at(900), ex: 680, w0: .56, w1: .76 },
+    ];
+    const partGroup = (p) => { const g = mk("g", { "class": "part" }); p.el = g; return g; };
+    (() => { const p = PARTS[0], g = partGroup(p);                       // 轴
+      barrel(g, p.c, 14, 220, "wire");
+      const b = axis(p.c, 220);
+      circ(b[0], b[1], 14, "wire-soft", g);
+      line(...axis(p.c, 26), ...axis(p.c, 110), "wire-soft", g);
+      line(p.c[0] + P.x * 9, p.c[1] + P.y * 9, axis(p.c, 160)[0] + P.x * 9, axis(p.c, 160)[1] + P.y * 9, "wire-soft", g);
+    })();
+    (() => { const p = PARTS[1], g = partGroup(p);                       // 转子（9 片叠层）
+      for (let j = 0; j < 9; j++) {
+        const cj = axis(p.c, j * 12);
+        circ(cj[0], cj[1], 58, j === 0 ? "wire" : "wire-soft", g);
+      }
+      const L = 8 * 12;
+      line(p.c[0] + P.x * 58, p.c[1] + P.y * 58, axis(p.c, L)[0] + P.x * 58, axis(p.c, L)[1] + P.y * 58, "wire", g);
+      line(p.c[0] - P.x * 58, p.c[1] - P.y * 58, axis(p.c, L)[0] - P.x * 58, axis(p.c, L)[1] - P.y * 58, "wire", g);
+      circ(p.c[0], p.c[1], 24, "wire-soft", g);
+      boltCircle(g, p.c, 42, 8, 4, "wire-soft");
+      centerMark(g, p.c, 58);
+    })();
+    for (const id of ["bearingF", "bearingR"]) {                         // 前后轴承
+      const p = PARTS.find((q) => q.id === id), g = partGroup(p);
+      barrel(g, p.c, 34, 16, "wire");
+      circ(p.c[0], p.c[1], 23, "wire-soft", g);
+      circ(p.c[0], p.c[1], 14, "wire-soft", g);
+      boltCircle(g, p.c, 19, 8, 4, "wire");
+      centerMark(g, p.c, 34);
+    }
+    (() => { const p = PARTS[4], g = partGroup(p);                       // 定子
+      barrel(g, p.c, 88, 108, "wire");
+      circ(p.c[0], p.c[1], 70, "wire", g);
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+        line(p.c[0] + c * 70, p.c[1] + s * 70, p.c[0] + c * 88, p.c[1] + s * 88, "wire-soft", g);
+      }
+      boltCircle(g, p.c, 79, 12, 4.5, "wire-soft");
+      centerMark(g, p.c, 88);
+    })();
+    (() => { const p = PARTS[5], g = partGroup(p);                       // 机壳（11 道散热筋 + 底脚）
+      for (let j = 0; j < 11; j++) {
+        const cj = axis(p.c, j * 11);
+        circ(cj[0], cj[1], 105, j === 0 ? "wire" : "wire-soft", g);
+      }
+      const L = 10 * 11;
+      line(p.c[0] + P.x * 105, p.c[1] + P.y * 105, axis(p.c, L)[0] + P.x * 105, axis(p.c, L)[1] + P.y * 105, "wire", g);
+      line(p.c[0] - P.x * 105, p.c[1] - P.y * 105, axis(p.c, L)[0] - P.x * 105, axis(p.c, L)[1] - P.y * 105, "wire", g);
+      const f = [p.c[0] - P.y * 105, p.c[1] + P.x * 105];
+      line(f[0] - 26, f[1] + 8, f[0] + 60, f[1] + 8, "wire", g);
+      line(f[0] - 26, f[1] + 8, f[0] - 8, f[1] - 14, "wire", g);
+      line(f[0] + 60, f[1] + 8, f[0] + 42, f[1] - 14, "wire", g);
+      centerMark(g, p.c, 105);
+    })();
+    (() => { const p = PARTS[6], g = partGroup(p);                       // 前端盖
+      barrel(g, p.c, 80, 20, "wire");
+      circ(p.c[0], p.c[1], 85, "wire", g);
+      circ(p.c[0], p.c[1], 42, "wire-soft", g);
+      boltCircle(g, p.c, 72, 6, 4, "wire");
+      centerMark(g, p.c, 85);
+    })();
+    (() => { const p = PARTS[7], g = partGroup(p);                       // 后端盖
+      barrel(g, p.c, 80, 20, "wire");
+      circ(p.c[0], p.c[1], 85, "wire", g);
+      boltCircle(g, p.c, 72, 6, 4, "wire");
+      centerMark(g, p.c, 85);
+    })();
+
+    /* — 尺寸标注 — */
+    const dims = mk("g", { "class": "dims" });
+    {
+      const RC = at(270);
+      line(RC[0] - 58, RC[1] + 7,  RC[0] - 58, RC[1] + 90, "dline", dims);
+      line(RC[0] + 58, RC[1] + 7,  RC[0] + 58, RC[1] + 90, "dline", dims);
+      line(RC[0] - 58, RC[1] + 82, RC[0] + 58, RC[1] + 82, "dline2", dims);
+      mk("path", { d: `M${RC[0] - 58} ${RC[1] + 82} l9 -2.6 v5.2 Z`, "class": "darrow" }, dims);
+      mk("path", { d: `M${RC[0] + 58} ${RC[1] + 82} l-9 -2.6 v5.2 Z`, "class": "darrow" }, dims);
+      const t = mk("text", { x: RC[0], y: RC[1] + 74, "text-anchor": "middle", "class": "dtxt" }, dims);
+      t.textContent = "Ø58";
+    }
+    {
+      const SC = at(40);
+      const e0 = [SC[0] - P.x * 14, SC[1] + P.y * 14];
+      const e1 = [e0[0] - P.x * 30, e0[1] + P.y * 30];
+      const e2 = [e1[0] - 101, e1[1]];
+      mk("path", { d: `M${e0[0]} ${e0[1]} L${e1[0]} ${e1[1]} L${e2[0]} ${e2[1]}`, "class": "dline2" }, dims);
+      const t = mk("text", { x: e2[0] - 6, y: e2[1] - 8, "text-anchor": "end", "class": "dtxt" }, dims);
+      t.textContent = "Ø14 h7";
+    }
+
+    /* — leader + 标注 — */
+    for (const L of HM_LABELS) {
+      const path = `M${L.from[0]} ${L.from[1]} L${L.elbow[0]} ${L.elbow[1]} L${L.to[0]} ${L.to[1]}`;
+      mk("path", { d: path, "class": "leader", pathLength: "1", style: `--ld:${L.d}s` });
+      const t = mk("text", { x: L.to[0] - 24, y: L.to[1] - 12, "class": "lbl", style: `--ld:${L.d}s;--lt:${L.d + 0.15}s` });
+      t.textContent = L.text;
+      const zh = mk("tspan", { "class": "zh" }, t);
+      zh.textContent = L.zh;
+    }
+
+    /* — 点火序列元素（仅开场使用） — */
+    const HEART = at(430);
+    const cLine = svg.querySelector(".cline");
+    cLine.style.opacity = 0;
+    const igniteF = mk("path", { d: `M${HEART[0]} ${HEART[1]} L${at(-70)[0]} ${at(-70)[1]}`,
+      fill: "none", stroke: "var(--green)", "stroke-width": 1.5, opacity: .95,
+      pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": "1", "vector-effect": "non-scaling-stroke" });
+    const igniteR = mk("path", { d: `M${HEART[0]} ${HEART[1]} L${at(1000)[0]} ${at(1000)[1]}`,
+      fill: "none", stroke: "var(--green)", "stroke-width": 1.5, opacity: .95,
+      pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": "1", "vector-effect": "non-scaling-stroke" });
+    const pilotHalo = mk("circle", { cx: HEART[0], cy: HEART[1], r: 12, fill: "var(--green)", opacity: 0 });
+    const pilot = mk("circle", { cx: HEART[0], cy: HEART[1], r: 4, fill: "var(--green)", opacity: 0 });
+
+    /* — 信号场 — */
+    const W = sec.clientWidth, H = sec.clientHeight;
+    const sigData = [];
+    for (let i = 0; i < 26; i++) {
+      const s = document.createElement("i");
+      const tagged = i < HM_SIG_TAGS.length;
+      s.className = "sig";
+      let x, y;
+      if (tagged) {
+        x = W * (0.45 + Math.random() * 0.5);
+        y = H * (0.15 + Math.random() * 0.7);
+      } else {
+        x = Math.random() * W; y = Math.random() * H;
+      }
+      s.style.left = x + "px"; s.style.top = y + "px";
+      let lbl = null;
+      if (tagged) {
+        lbl = document.createElement("b");
+        lbl.textContent = HM_SIG_TAGS[i];
+        s.appendChild(lbl);
+      }
+      sigBox.appendChild(s);
+      const w0 = 0.01 + (i % 9) * 0.007;
+      sigData.push({ el: s, lbl, x, y,
+        tx: W * 0.62 + (Math.random() * 40 - 20),
+        ty: H * 0.48 + (Math.random() * 40 - 20),
+        w0, w1: w0 + 0.055 });
+    }
+    const sigRand = sigData.map(() => Math.random() * 0.25);
+
+    /* — 渲染（p 驱动，自动播放与拆解共用） — */
+    const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const C1 = 1.3;
+    const easeOutBack = (t) => 1 + (C1 + 1) * Math.pow(t - 1, 3) + C1 * Math.pow(t - 1, 2);
+    const easeInOut = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const state = { mode: "idle", p: 0, target: 0, rafId: null, t0: null, cineOn: true, played: false };
+    st.current = state;
+    window.__hm = state; // 测试探针：验证滚轮驱动是否当帧生效
+
+    function render(p) {
+      state.p = p;
+      for (const s of sigData) {
+        const local = clamp01((p - s.w0) / (s.w1 - s.w0));
+        const e = easeInOut(local);
+        s.el.style.transform =
+          `translate(${((s.tx - s.x) * e).toFixed(1)}px,${((s.ty - s.y) * e).toFixed(1)}px) scale(${(1 - 0.6 * e).toFixed(3)})`;
+        s.el.style.opacity = e < .55 ? 1 : (1 - (e - .55) / .45).toFixed(3);
+        if (s.lbl) s.lbl.style.opacity = Math.max(0, 1 - local * 2.5).toFixed(3);
+      }
+      for (const m of PARTS) {
+        const local = clamp01((p - m.w0) / (m.w1 - m.w0));
+        const e = easeOutBack(local), k = 1 - e;
+        let tf = `translate(${(-U.x * m.ex * k).toFixed(2)}px, ${(-U.y * m.ex * k).toFixed(2)}px)`;
+        if (m.id === "rotor") tf += ` rotate(${(k * 10).toFixed(2)}deg)`;
+        m.el.style.transform = tf;
+        m.el.style.opacity = Math.min(1, local * 3).toFixed(3);
+      }
+      let done = 0;
+      for (const m of PARTS) if ((p - m.w0) / (m.w1 - m.w0) >= .99) done++;
+      cntRef.current.textContent = done + "/8";
+      okRef.current.textContent = done === 8 ? "OK" : "···";
+      sec.classList.toggle("f-pre",    p > .09);
+      sec.classList.toggle("f-copy",   p > .10);
+      sec.classList.toggle("f-hud",    p > .10);
+      sec.classList.toggle("f-leader", p > .78);
+      const showHint = true; // 序章与静止态都给出操作提示
+      sec.classList.toggle("f-no-hint", !showHint);
+      hintRef.current.textContent = state.mode === "auto" ? HM_HINT_AUTO
+        : p <= .001 ? HM_HINT_SCATTERED
+        : p >= .999 ? HM_HINT_ASSEMBLED
+        : HM_HINT_MID;
+    }
+
+    /* — 开场电影：绿灯亮起 → 点燃中心线 → 信号场浮现 → 收拢装配 — */
+    function cineBlack() {
+      sec.classList.remove("f-no-hint", "f-pre", "f-copy", "f-hud", "f-leader");
+      hintRef.current.textContent = HM_HINT_AUTO;
+      cLine.style.opacity = 0;
+      for (const m of PARTS) m.el.style.opacity = 0;
+      for (const s of sigData) {
+        s.el.style.opacity = 0;
+        s.el.style.transform = "translate(0px,0px) scale(1)";
+      }
+      igniteF.style.strokeDashoffset = 1; igniteR.style.strokeDashoffset = 1;
+      igniteF.style.opacity = .95; igniteR.style.opacity = .95;
+      pilot.style.opacity = 0; pilotHalo.style.opacity = 0;
+    }
+    function cine(t) {
+      if (t < HM_T.blink) {
+        const op = t < .15 ? 0 : t < .25 ? 1 : t < .38 ? .12 : 1;
+        pilot.style.opacity = op;
+        pilotHalo.style.opacity = (op * .18).toFixed(3);
+        return;
+      }
+      pilot.style.opacity = 1; pilotHalo.style.opacity = .18;
+      if (t < HM_T.ignite) {
+        const k = (t - HM_T.blink) / (HM_T.ignite - HM_T.blink);
+        igniteF.style.strokeDashoffset = 1 - k;
+        igniteR.style.strokeDashoffset = 1 - k;
+        return;
+      }
+      const k = easeInOut(clamp01((t - HM_T.ignite) / (HM_T.field - HM_T.ignite)));
+      state.cineOn = false;
+      sec.classList.remove("cine");
+      igniteF.style.opacity = (.95 * (1 - k)).toFixed(3);
+      igniteR.style.opacity = (.95 * (1 - k)).toFixed(3);
+      cLine.style.opacity = (k * .42).toFixed(3);
+      pilot.style.opacity = (1 - k).toFixed(3);
+      pilotHalo.style.opacity = (.18 * (1 - k)).toFixed(3);
+      sigData.forEach((s, i) => {
+        s.el.style.opacity = clamp01((k - sigRand[i]) / 0.6).toFixed(3);
+      });
+    }
+    function autoP(t) {
+      for (let i = 1; i < HM_KNOTS.length; i++) {
+        if (t <= HM_KNOTS[i][0]) {
+          const [t0, p0] = HM_KNOTS[i - 1], [t1, p1] = HM_KNOTS[i];
+          return p0 + (p1 - p0) * (t - t0) / (t1 - t0);
+        }
+      }
+      return 1;
+    }
+    function tick(ts) {
+      if (state.mode !== "auto") return;
+      if (state.t0 === null) state.t0 = ts;
+      const t = (ts - state.t0) / 1000;
+      if (t < HM_T.field) cine(t);
+      else render(autoP(t));
+      if (t < HM_KNOTS[HM_KNOTS.length - 1][0]) state.rafId = requestAnimationFrame(tick);
+      else enterScroll();
+    }
+    function enterScroll() {
+      if (state.mode === "scroll") return;
+      state.mode = "scroll"; state.played = true; state.cineOn = false;
+      sec.classList.remove("cine");
+      cLine.style.opacity = "";
+      igniteF.style.opacity = 0; igniteR.style.opacity = 0;
+      pilot.style.opacity = 0; pilotHalo.style.opacity = 0;
+      state.target = 1;                    // 序章停在装配完成（8/8），拆解交给滚动
+      render(1);
+    }
+    function finishAuto() {
+      if (state.mode !== "auto") return;
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+      enterScroll();
+    }
+    function startAuto() {
+      state.mode = "auto"; state.t0 = null; state.cineOn = true; state.target = 0;
+      sec.classList.add("cine");
+      cineBlack();
+      state.rafId = requestAnimationFrame(tick);
+    }
+    /* — 滚动直接驱动：滚多少走多少，当帧渲染，不做缓动追赶 — */
+    state.wheel = (dir, dy) => {
+      if (state.mode === "auto") { if (dir > 0) finishAuto(); return; }
+      if (state.mode !== "scroll") return;
+      if (dir > 0 && state.p >= 1) { exploreRef.current(); return; } // 8/8 再下滑 → Impact
+      if (dir < 0 && state.p <= 0) return;                           // 0/8 再上滑 → 到头
+      const next = clamp01(state.p + (dy || dir * 120) * 0.0011);    // 带符号增量：下滑装回 / 上滑拆解
+      if (next === state.p) return;
+      state.target = next;
+      render(next); // render 内部写 state.p
+    };
+    state.startAuto = startAuto;
+    state.render = render;
+    state.finishAuto = finishAuto;
+
+    /* — 键盘（App 在 hero 场景把按键交给这里） — */
+    const onKey = (e) => {
+      if (!activeRef.current || mobileRef.current) return;
+      if (lockedRef && lockedRef.current) return;
+      if (e.key === " " || e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); state.wheel(1); }
+      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); state.wheel(-1); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+    };
+  }, []);
+
+  // —— 进入 / 离开场景（layout effect：进入即开播，首帧不闪） ——
+  useL(() => {
+    const s = st.current;
+    if (!s) return;
+    if (active) {
+      if (!s.played) s.startAuto();
+      else { // 重返 Hero = 回到装配完成态（8/8）；再上滑才倒放拆解
+        s.mode = "scroll"; s.cineOn = false;
+        secRef.current.classList.remove("cine");
+        s.target = 1; s.render(1);
+      }
+    } else {
+      if (s.rafId) { cancelAnimationFrame(s.rafId); s.rafId = null; }
+    }
+  }, [active]);
+
+  // —— React 重渲染会重置 className：把命令式状态同步回去 ——
+  useE(() => {
+    const s = st.current;
+    if (!s) return;
+    if (s.mode === "auto" && s.cineOn) secRef.current.classList.add("cine");
+    if (s.mode === "scroll") s.render(s.p);
+  });
+
+  const onWheel = (e) => {
+    const g = window.__wguard;
+    if (g) g.last = performance.now();      // 记录滚动活动，供 App 检测「停稳」
+    const s = st.current;
+    if (!s || mobile || !active || (lockedRef && lockedRef.current)) return;
+    if (Math.abs(e.deltaY) < 1) return;
+    // 不查 g.lock：从 Impact 上滑进来的同一手势要连贯地带进拆解（App 层锁仍防场景连跳）
+    s.wheel(e.deltaY > 0 ? 1 : -1, e.deltaY);
+  };
+  const onPointerDown = () => { const s = st.current; if (s) s.finishAuto(); };
+
   return (
-    <section className={`scene hero ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
-      <div className="hero-cad" aria-hidden="true">
-        <span className="hero-ring ring-a" /><span className="hero-ring ring-b" />
-        <span className="hero-axis axis-a" /><span className="hero-axis axis-b" />
-        <span className="hero-tag tag-a">ORDER / #BL-240817</span>
-        <span className="hero-tag tag-b">INTELLIGENCE / ONLINE</span>
-        <span className="hero-tag tag-c">OUTPUT / 生产路径</span>
-        <span className="hero-flow" />
+    <section
+      ref={secRef}
+      className={`scene hero ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`}
+      aria-hidden={!active}
+      onWheel={onWheel}
+      onPointerDown={onPointerDown}
+    >
+      <div className="hm-head"><span>FACTORY INPUT / LIVE</span><span>SHANGHAI · 2026</span></div>
+      <div className="hm-pre">
+        <p className="hm-kicker">00 · PRELUDE</p>
+        <h2>每一个订单背后，<br />都是一连串判断。<br /><span>我们正在让智能参与其中。</span></h2>
       </div>
-      <div className="hero-copy">
+      <div className="hm-sigs" ref={sigBoxRef} aria-hidden="true" />
+      <div className="hm-stage"><svg ref={svgRef} viewBox="0 0 1400 760" aria-label="伺服电机工程爆炸图" /></div>
+      <div className="hm-copy">
         <p className="eyebrow">INTELLIGENCE × MANUFACTURING</p>
         <h1>让智能进入工厂<br /><span className="sub">产生真实价值</span></h1>
-        <p className="hero-lede">让软件不只记录生产，而开始理解、判断和行动。40,000+ 工厂已经在黑湖的系统里运转——现在，我们要让智能住进去。</p>
-        <div className="hero-actions">
+        <div className="hm-btns">
           <button className="btn" onClick={onExplore}>探索我们在做什么 <span className="arw">↓</span></button>
           <button className="btn btn-paper" onClick={() => onApply("全部")}>查看开放职位 <span className="arw">↗</span></button>
         </div>
       </div>
-      <div className="scroll-cue" aria-hidden="true"><span>SCROLL · FOLLOW THE ORDER</span><i /></div>
-    </section>
-  );
-}
-
-// ═══════════ 02 One Order：这单，能不能接 ═══════════
-function Order({ active, leaving, prog }) {
-  const resolvedCount = Math.min(4, Math.max(0, Math.ceil(prog * 4.7)));
-  const conv = prog > 0.55;
-  return (
-    <section className={`scene order ${active ? "is-active" : ""} ${leaving ? "leaving" : ""} ${conv ? "conv" : ""}`} aria-hidden={!active}>
-      <div className="order-grid" aria-hidden="true" />
-      <header className="order-heading">
-        <p>ONE ORDER / REAL CONSTRAINTS</p>
-        <h2>这单，<span>能不能接？</span></h2>
-      </header>
-      <article className="ticket">
-        <div className="ticket-top"><span>INCOMING ORDER</span><span>17:42:08</span></div>
-        <strong>{ORDER_TICKET.no}</strong>
-        <p>{ORDER_TICKET.name}</p>
-        <div className="ticket-meta">{ORDER_TICKET.meta.map((m) => <span key={m}>{m}</span>)}</div>
-        <div className="ticket-bar" aria-hidden="true" />
-      </article>
-      <div className="decision-stream stream" aria-label="订单判断过程">
-        {JUDGMENTS.map((j, i) => {
-          const on = i < resolvedCount;
-          return (
-            <div className={`node ${on ? "resolved" : ""}`} key={j.no}>
-              <div className="node-idx">{j.no}</div>
-              <div className="node-copy">
-                <span>{j.label}</span>
-                <strong>{j.value}</strong>
-                <small>{j.detail}</small>
-              </div>
-              <div className="node-state"><i />{on ? j.state : "等待判断"}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="smart" aria-hidden={!conv}>
-        <div className="smart-in">
-          {SMART_IN.map((s) => <div key={s}>{s}</div>)}
-        </div>
-        <div className="smart-core"><i /></div>
-        <div className="smart-out">
-          {SMART_OUT.map((s) => <div key={s}>{s}</div>)}
-        </div>
-      </div>
-      <p className="smart-line">{SMART_LINE}</p>
-      <div className={`verdict ${prog > 0.88 ? "resolved" : ""}`}>
-        <span>DECISION / CONFIDENCE 94%</span>
-        <strong>可以接。</strong>
-        <p>已生成生产路径 · 主要风险：阳极氧化产能窗口</p>
-      </div>
-      <div className="order-progress" aria-hidden="true">
-        <span>ORDER</span>
-        <div><i style={{ width: `${Math.max(6, prog * 100)}%` }} /></div>
-        <span>DECISION</span>
-      </div>
-      <p className="order-note">继续滚动，让判断依次发生</p>
+      <p className="hm-hud">ASSEMBLY <b ref={cntRef}>0/8</b> · FIT ±0.02 · <b ref={okRef}>···</b></p>
+      <p className="hm-hint"><span ref={hintRef}>{HM_HINT_AUTO}</span></p>
     </section>
   );
 }
@@ -522,4 +830,4 @@ function OEEGame() {
   );
 }
 
-Object.assign(window, { Prelude, Hero, Order, Impact, Frontier, JobsScene, JobsDrawer, OEEGame });
+Object.assign(window, { Hero, Impact, Frontier, JobsScene, JobsDrawer, OEEGame });

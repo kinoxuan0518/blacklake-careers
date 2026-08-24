@@ -1,125 +1,433 @@
-/* global React, window, SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
+/* global React, window, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
 // ============ Blacklake Careers v6 · Scenes (EN · Living Factory) ============
 
-// ═══════════ 00 Prelude ═══════════
-function Prelude({ active, leaving, onSkip }) {
-  return (
-    <section className={`scene prelude ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
-      <div className="prelude-head">
-        <span>FACTORY INPUT / LIVE</span>
-        <span>SHANGHAI · 2026</span>
-      </div>
-      <div className="signal-space" aria-hidden="true">
-        <div className="blueprint">
-          <span className="bp-circle bp-one" />
-          <span className="bp-circle bp-two" />
-          <span className="bp-axis bp-axis-x" />
-          <span className="bp-axis bp-axis-y" />
-          <span className="bp-dim dim-one">84.00 ±0.02</span>
-          <span className="bp-dim dim-two">Ø 12 H7</span>
-        </div>
-        {SIGNALS.map((s, i) => (
-          <div className={`signal ${s.cls}`} key={s.kind} style={{ "--i": i }}>
-            <span className="signal-kind">{s.kind}</span>
-            <strong>{s.value}</strong>
-            <small>{s.meta}</small>
-          </div>
-        ))}
-        <div className="conn conn-a" /><div className="conn conn-b" />
-        <div className="conn conn-c" /><div className="conn conn-d" />
-        <div className="core"><i /><span>INTELLIGENCE</span></div>
-      </div>
-      <div className="prelude-copy">
-        <p className="prelude-line line-one">{PRELUDE_LINES[0]}</p>
-        <p className="prelude-line line-two">{PRELUDE_LINES[1]}</p>
-      </div>
-      <button className="skip-intro" onClick={onSkip}>Skip intro <span>SPACE</span></button>
-      <div className="intro-timeline" aria-hidden="true"><i /><span>INTRO</span></div>
-    </section>
-  );
-}
+// ═══════════ 00–01 Hero: pilot light → signals converge → servo assembly → wheel-up explodes ═══════════
+const HM_LABELS = [
+  { from: [782, 177],  elbow: [700, 64],   to: [620, 64],   text: "HOUSING · ", zh: "ORDER BL-240817",   d: 0 },
+  { from: [938, 320],  elbow: [920, 190],  to: [920, 140],  text: "STATOR · ",  zh: "MATERIAL AL 6061-T6", d: 0.12 },
+  { from: [1039, 432], elbow: [1100, 330], to: [1100, 270], text: "ROTOR · ",   zh: "TOL ±0.02",         d: 0.18 },
+  { from: [1141, 606], elbow: [1080, 670], to: [1010, 710], text: "BEARING · ", zh: "MACHINE CNC A17",   d: 0.24 },
+  { from: [548, 178],  elbow: [500, 480],  to: [500, 690],  text: "END CAP · ", zh: "72 H LEAD TIME",    d: 0.3 },
+];
+const HM_SIG_TAGS = ["ORDER #BL-240817", "DRAWING BRKT-A17-R3", "MATERIAL AL 6061-T6",
+                     "DELIVERY 72 H", "MACHINE CNC · A17", "PROCESS OP 30"];
+const HM_T = { blink: 0.9, ignite: 1.3, field: 1.9 };
+const HM_KNOTS = [[HM_T.field, 0], [2.7, 0.10], [4.8, 0.80], [5.6, 1.0]];
+const HM_HINT_AUTO = "AUTO · ASSEMBLE · SPACE TO SKIP";
+const HM_HINT_ASSEMBLED = "SCROLL ↓ NEXT · ↑ EXPLODE";
+const HM_HINT_MID = "SCROLL ↓ REASSEMBLE · ↑ EXPLODE";
+const HM_HINT_SCATTERED = "SCROLL ↓ REASSEMBLE";
 
-// ═══════════ 01 Hero ═══════════
-function Hero({ active, leaving, onExplore, onApply }) {
+function Hero({ active, leaving, onExplore, onApply, mobile, lockedRef }) {
+  const secRef = useR(null);
+  const svgRef = useR(null);
+  const sigBoxRef = useR(null);
+  const cntRef = useR(null);
+  const okRef = useR(null);
+  const hintRef = useR(null);
+  const st = useR(null);
+  const activeRef = useR(active); activeRef.current = active;
+  const mobileRef = useR(mobile); mobileRef.current = mobile;
+  const exploreRef = useR(onExplore); exploreRef.current = onExplore;
+
+  // —— Build the drawing + signal field + state machine (once; layout effect so first paint is already masked) ——
+  useL(() => {
+    const sec = secRef.current, svg = svgRef.current, sigBox = sigBoxRef.current;
+    sec.classList.add("cine"); // mask before reading layout: clientWidth forces style resolution
+    const NS = "http://www.w3.org/2000/svg";
+    const U = { x: -0.78, y: -0.63 }, P = { x: 0.63, y: -0.78 };
+    const mk = (tag, attrs, parent) => {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      (parent || svg).appendChild(el); return el;
+    };
+    const line = (x1, y1, x2, y2, cls, parent) => mk("line", { x1, y1, x2, y2, "class": cls }, parent);
+    const circ = (cx, cy, r, cls, parent) => mk("circle", { cx, cy, r, "class": cls }, parent);
+    const axis = (c, k) => [c[0] + U.x * k, c[1] + U.y * k];
+    function barrel(g, c, r, len, cls, dim) {
+      const b = axis(c, len);
+      circ(b[0], b[1], r, dim ? "wire-dim" : "wire-soft", g);
+      line(c[0] + P.x * r, c[1] + P.y * r, b[0] + P.x * r, b[1] + P.y * r, cls, g);
+      line(c[0] - P.x * r, c[1] - P.y * r, b[0] - P.x * r, b[1] - P.y * r, cls, g);
+      circ(c[0], c[1], r, cls, g);
+    }
+    function boltCircle(g, c, R, n, r, cls) {
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2;
+        circ(c[0] + Math.cos(a) * R, c[1] + Math.sin(a) * R, r, cls, g);
+      }
+    }
+    function centerMark(g, c, r) {
+      line(c[0] - r - 8, c[1], c[0] + r + 8, c[1], "cmark", g);
+      line(c[0], c[1] - r - 8, c[0], c[1] + r + 8, "cmark", g);
+    }
+
+    /* — part layout — */
+    const FRONT = [1250, 660];
+    const at = (k) => axis(FRONT, k);
+    line(...at(-70), ...at(1000), "cline");
+    const PARTS = [
+      { id: "shaft",    k: 40,  c: at(40),  ex: 250, w0: .10, w1: .26 },
+      { id: "rotor",    k: 270, c: at(270), ex: 300, w0: .16, w1: .34 },
+      { id: "bearingF", k: 140, c: at(140), ex: 380, w0: .24, w1: .42 },
+      { id: "bearingR", k: 780, c: at(780), ex: 420, w0: .26, w1: .44 },
+      { id: "stator",   k: 400, c: at(400), ex: 480, w0: .34, w1: .54 },
+      { id: "housing",  k: 600, c: at(600), ex: 540, w0: .42, w1: .62 },
+      { id: "capF",     k: 0,   c: at(0),   ex: 620, w0: .52, w1: .72 },
+      { id: "capR",     k: 900, c: at(900), ex: 680, w0: .56, w1: .76 },
+    ];
+    const partGroup = (p) => { const g = mk("g", { "class": "part" }); p.el = g; return g; };
+    (() => { const p = PARTS[0], g = partGroup(p);                       // shaft
+      barrel(g, p.c, 14, 220, "wire");
+      const b = axis(p.c, 220);
+      circ(b[0], b[1], 14, "wire-soft", g);
+      line(...axis(p.c, 26), ...axis(p.c, 110), "wire-soft", g);
+      line(p.c[0] + P.x * 9, p.c[1] + P.y * 9, axis(p.c, 160)[0] + P.x * 9, axis(p.c, 160)[1] + P.y * 9, "wire-soft", g);
+    })();
+    (() => { const p = PARTS[1], g = partGroup(p);                       // rotor (9 laminations)
+      for (let j = 0; j < 9; j++) {
+        const cj = axis(p.c, j * 12);
+        circ(cj[0], cj[1], 58, j === 0 ? "wire" : "wire-soft", g);
+      }
+      const L = 8 * 12;
+      line(p.c[0] + P.x * 58, p.c[1] + P.y * 58, axis(p.c, L)[0] + P.x * 58, axis(p.c, L)[1] + P.y * 58, "wire", g);
+      line(p.c[0] - P.x * 58, p.c[1] - P.y * 58, axis(p.c, L)[0] - P.x * 58, axis(p.c, L)[1] - P.y * 58, "wire", g);
+      circ(p.c[0], p.c[1], 24, "wire-soft", g);
+      boltCircle(g, p.c, 42, 8, 4, "wire-soft");
+      centerMark(g, p.c, 58);
+    })();
+    for (const id of ["bearingF", "bearingR"]) {                         // bearings
+      const p = PARTS.find((q) => q.id === id), g = partGroup(p);
+      barrel(g, p.c, 34, 16, "wire");
+      circ(p.c[0], p.c[1], 23, "wire-soft", g);
+      circ(p.c[0], p.c[1], 14, "wire-soft", g);
+      boltCircle(g, p.c, 19, 8, 4, "wire");
+      centerMark(g, p.c, 34);
+    }
+    (() => { const p = PARTS[4], g = partGroup(p);                       // stator
+      barrel(g, p.c, 88, 108, "wire");
+      circ(p.c[0], p.c[1], 70, "wire", g);
+      for (let i = 0; i < 12; i++) {
+        const a = i / 12 * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+        line(p.c[0] + c * 70, p.c[1] + s * 70, p.c[0] + c * 88, p.c[1] + s * 88, "wire-soft", g);
+      }
+      boltCircle(g, p.c, 79, 12, 4.5, "wire-soft");
+      centerMark(g, p.c, 88);
+    })();
+    (() => { const p = PARTS[5], g = partGroup(p);                       // housing (11 fins + foot)
+      for (let j = 0; j < 11; j++) {
+        const cj = axis(p.c, j * 11);
+        circ(cj[0], cj[1], 105, j === 0 ? "wire" : "wire-soft", g);
+      }
+      const L = 10 * 11;
+      line(p.c[0] + P.x * 105, p.c[1] + P.y * 105, axis(p.c, L)[0] + P.x * 105, axis(p.c, L)[1] + P.y * 105, "wire", g);
+      line(p.c[0] - P.x * 105, p.c[1] - P.y * 105, axis(p.c, L)[0] - P.x * 105, axis(p.c, L)[1] - P.y * 105, "wire", g);
+      const f = [p.c[0] - P.y * 105, p.c[1] + P.x * 105];
+      line(f[0] - 26, f[1] + 8, f[0] + 60, f[1] + 8, "wire", g);
+      line(f[0] - 26, f[1] + 8, f[0] - 8, f[1] - 14, "wire", g);
+      line(f[0] + 60, f[1] + 8, f[0] + 42, f[1] - 14, "wire", g);
+      centerMark(g, p.c, 105);
+    })();
+    (() => { const p = PARTS[6], g = partGroup(p);                       // front cap
+      barrel(g, p.c, 80, 20, "wire");
+      circ(p.c[0], p.c[1], 85, "wire", g);
+      circ(p.c[0], p.c[1], 42, "wire-soft", g);
+      boltCircle(g, p.c, 72, 6, 4, "wire");
+      centerMark(g, p.c, 85);
+    })();
+    (() => { const p = PARTS[7], g = partGroup(p);                       // rear cap
+      barrel(g, p.c, 80, 20, "wire");
+      circ(p.c[0], p.c[1], 85, "wire", g);
+      boltCircle(g, p.c, 72, 6, 4, "wire");
+      centerMark(g, p.c, 85);
+    })();
+
+    /* — dimension callouts — */
+    const dims = mk("g", { "class": "dims" });
+    {
+      const RC = at(270);
+      line(RC[0] - 58, RC[1] + 7,  RC[0] - 58, RC[1] + 90, "dline", dims);
+      line(RC[0] + 58, RC[1] + 7,  RC[0] + 58, RC[1] + 90, "dline", dims);
+      line(RC[0] - 58, RC[1] + 82, RC[0] + 58, RC[1] + 82, "dline2", dims);
+      mk("path", { d: `M${RC[0] - 58} ${RC[1] + 82} l9 -2.6 v5.2 Z`, "class": "darrow" }, dims);
+      mk("path", { d: `M${RC[0] + 58} ${RC[1] + 82} l-9 -2.6 v5.2 Z`, "class": "darrow" }, dims);
+      const t = mk("text", { x: RC[0], y: RC[1] + 74, "text-anchor": "middle", "class": "dtxt" }, dims);
+      t.textContent = "Ø58";
+    }
+    {
+      const SC = at(40);
+      const e0 = [SC[0] - P.x * 14, SC[1] + P.y * 14];
+      const e1 = [e0[0] - P.x * 30, e0[1] + P.y * 30];
+      const e2 = [e1[0] - 101, e1[1]];
+      mk("path", { d: `M${e0[0]} ${e0[1]} L${e1[0]} ${e1[1]} L${e2[0]} ${e2[1]}`, "class": "dline2" }, dims);
+      const t = mk("text", { x: e2[0] - 6, y: e2[1] - 8, "text-anchor": "end", "class": "dtxt" }, dims);
+      t.textContent = "Ø14 h7";
+    }
+
+    /* — leaders + part labels — */
+    for (const L of HM_LABELS) {
+      const path = `M${L.from[0]} ${L.from[1]} L${L.elbow[0]} ${L.elbow[1]} L${L.to[0]} ${L.to[1]}`;
+      mk("path", { d: path, "class": "leader", pathLength: "1", style: `--ld:${L.d}s` });
+      const t = mk("text", { x: L.to[0] - 24, y: L.to[1] - 12, "class": "lbl", style: `--ld:${L.d}s;--lt:${L.d + 0.15}s` });
+      t.textContent = L.text;
+      const zh = mk("tspan", { "class": "zh" }, t);
+      zh.textContent = L.zh;
+    }
+
+    /* — ignition elements (opening only) — */
+    const HEART = at(430);
+    const cLine = svg.querySelector(".cline");
+    cLine.style.opacity = 0;
+    const igniteF = mk("path", { d: `M${HEART[0]} ${HEART[1]} L${at(-70)[0]} ${at(-70)[1]}`,
+      fill: "none", stroke: "var(--green)", "stroke-width": 1.5, opacity: .95,
+      pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": "1", "vector-effect": "non-scaling-stroke" });
+    const igniteR = mk("path", { d: `M${HEART[0]} ${HEART[1]} L${at(1000)[0]} ${at(1000)[1]}`,
+      fill: "none", stroke: "var(--green)", "stroke-width": 1.5, opacity: .95,
+      pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": "1", "vector-effect": "non-scaling-stroke" });
+    const pilotHalo = mk("circle", { cx: HEART[0], cy: HEART[1], r: 12, fill: "var(--green)", opacity: 0 });
+    const pilot = mk("circle", { cx: HEART[0], cy: HEART[1], r: 4, fill: "var(--green)", opacity: 0 });
+
+    /* — signal field — */
+    const W = sec.clientWidth, H = sec.clientHeight;
+    const sigData = [];
+    for (let i = 0; i < 26; i++) {
+      const s = document.createElement("i");
+      const tagged = i < HM_SIG_TAGS.length;
+      s.className = "sig";
+      let x, y;
+      if (tagged) {
+        x = W * (0.45 + Math.random() * 0.5);
+        y = H * (0.15 + Math.random() * 0.7);
+      } else {
+        x = Math.random() * W; y = Math.random() * H;
+      }
+      s.style.left = x + "px"; s.style.top = y + "px";
+      let lbl = null;
+      if (tagged) {
+        lbl = document.createElement("b");
+        lbl.textContent = HM_SIG_TAGS[i];
+        s.appendChild(lbl);
+      }
+      sigBox.appendChild(s);
+      const w0 = 0.01 + (i % 9) * 0.007;
+      sigData.push({ el: s, lbl, x, y,
+        tx: W * 0.62 + (Math.random() * 40 - 20),
+        ty: H * 0.48 + (Math.random() * 40 - 20),
+        w0, w1: w0 + 0.055 });
+    }
+    const sigRand = sigData.map(() => Math.random() * 0.25);
+
+    /* — render (driven by p; shared by autoplay and explode) — */
+    const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+    const C1 = 1.3;
+    const easeOutBack = (t) => 1 + (C1 + 1) * Math.pow(t - 1, 3) + C1 * Math.pow(t - 1, 2);
+    const easeInOut = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const state = { mode: "idle", p: 0, target: 0, rafId: null, t0: null, cineOn: true, played: false };
+    st.current = state;
+    window.__hm = state; // test probe: verify wheel drives frames synchronously
+
+    function render(p) {
+      state.p = p;
+      for (const s of sigData) {
+        const local = clamp01((p - s.w0) / (s.w1 - s.w0));
+        const e = easeInOut(local);
+        s.el.style.transform =
+          `translate(${((s.tx - s.x) * e).toFixed(1)}px,${((s.ty - s.y) * e).toFixed(1)}px) scale(${(1 - 0.6 * e).toFixed(3)})`;
+        s.el.style.opacity = e < .55 ? 1 : (1 - (e - .55) / .45).toFixed(3);
+        if (s.lbl) s.lbl.style.opacity = Math.max(0, 1 - local * 2.5).toFixed(3);
+      }
+      for (const m of PARTS) {
+        const local = clamp01((p - m.w0) / (m.w1 - m.w0));
+        const e = easeOutBack(local), k = 1 - e;
+        let tf = `translate(${(-U.x * m.ex * k).toFixed(2)}px, ${(-U.y * m.ex * k).toFixed(2)}px)`;
+        if (m.id === "rotor") tf += ` rotate(${(k * 10).toFixed(2)}deg)`;
+        m.el.style.transform = tf;
+        m.el.style.opacity = Math.min(1, local * 3).toFixed(3);
+      }
+      let done = 0;
+      for (const m of PARTS) if ((p - m.w0) / (m.w1 - m.w0) >= .99) done++;
+      cntRef.current.textContent = done + "/8";
+      okRef.current.textContent = done === 8 ? "OK" : "···";
+      sec.classList.toggle("f-pre",    p > .09);
+      sec.classList.toggle("f-copy",   p > .10);
+      sec.classList.toggle("f-hud",    p > .10);
+      sec.classList.toggle("f-leader", p > .78);
+      const showHint = true; // keep the hint visible in auto and scroll modes
+      sec.classList.toggle("f-no-hint", !showHint);
+      hintRef.current.textContent = state.mode === "auto" ? HM_HINT_AUTO
+        : p <= .001 ? HM_HINT_SCATTERED
+        : p >= .999 ? HM_HINT_ASSEMBLED
+        : HM_HINT_MID;
+    }
+
+    /* — opening film: pilot light → ignite the axis → signal field emerges → converge & assemble — */
+    function cineBlack() {
+      sec.classList.remove("f-no-hint", "f-pre", "f-copy", "f-hud", "f-leader");
+      hintRef.current.textContent = HM_HINT_AUTO;
+      cLine.style.opacity = 0;
+      for (const m of PARTS) m.el.style.opacity = 0;
+      for (const s of sigData) {
+        s.el.style.opacity = 0;
+        s.el.style.transform = "translate(0px,0px) scale(1)";
+      }
+      igniteF.style.strokeDashoffset = 1; igniteR.style.strokeDashoffset = 1;
+      igniteF.style.opacity = .95; igniteR.style.opacity = .95;
+      pilot.style.opacity = 0; pilotHalo.style.opacity = 0;
+    }
+    function cine(t) {
+      if (t < HM_T.blink) {
+        const op = t < .15 ? 0 : t < .25 ? 1 : t < .38 ? .12 : 1;
+        pilot.style.opacity = op;
+        pilotHalo.style.opacity = (op * .18).toFixed(3);
+        return;
+      }
+      pilot.style.opacity = 1; pilotHalo.style.opacity = .18;
+      if (t < HM_T.ignite) {
+        const k = (t - HM_T.blink) / (HM_T.ignite - HM_T.blink);
+        igniteF.style.strokeDashoffset = 1 - k;
+        igniteR.style.strokeDashoffset = 1 - k;
+        return;
+      }
+      const k = easeInOut(clamp01((t - HM_T.ignite) / (HM_T.field - HM_T.ignite)));
+      state.cineOn = false;
+      sec.classList.remove("cine");
+      igniteF.style.opacity = (.95 * (1 - k)).toFixed(3);
+      igniteR.style.opacity = (.95 * (1 - k)).toFixed(3);
+      cLine.style.opacity = (k * .42).toFixed(3);
+      pilot.style.opacity = (1 - k).toFixed(3);
+      pilotHalo.style.opacity = (.18 * (1 - k)).toFixed(3);
+      sigData.forEach((s, i) => {
+        s.el.style.opacity = clamp01((k - sigRand[i]) / 0.6).toFixed(3);
+      });
+    }
+    function autoP(t) {
+      for (let i = 1; i < HM_KNOTS.length; i++) {
+        if (t <= HM_KNOTS[i][0]) {
+          const [t0, p0] = HM_KNOTS[i - 1], [t1, p1] = HM_KNOTS[i];
+          return p0 + (p1 - p0) * (t - t0) / (t1 - t0);
+        }
+      }
+      return 1;
+    }
+    function tick(ts) {
+      if (state.mode !== "auto") return;
+      if (state.t0 === null) state.t0 = ts;
+      const t = (ts - state.t0) / 1000;
+      if (t < HM_T.field) cine(t);
+      else render(autoP(t));
+      if (t < HM_KNOTS[HM_KNOTS.length - 1][0]) state.rafId = requestAnimationFrame(tick);
+      else enterScroll();
+    }
+    function enterScroll() {
+      if (state.mode === "scroll") return;
+      state.mode = "scroll"; state.played = true; state.cineOn = false;
+      sec.classList.remove("cine");
+      cLine.style.opacity = "";
+      igniteF.style.opacity = 0; igniteR.style.opacity = 0;
+      pilot.style.opacity = 0; pilotHalo.style.opacity = 0;
+      state.target = 1;                    // intro ends assembled (8/8); explode is scroll-driven
+      render(1);
+    }
+    function finishAuto() {
+      if (state.mode !== "auto") return;
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+      enterScroll();
+    }
+    function startAuto() {
+      state.mode = "auto"; state.t0 = null; state.cineOn = true; state.target = 0;
+      sec.classList.add("cine");
+      cineBlack();
+      state.rafId = requestAnimationFrame(tick);
+    }
+    /* — direct wheel drive: progress follows the gesture 1:1, rendered same frame, no easing chase — */
+    state.wheel = (dir, dy) => {
+      if (state.mode === "auto") { if (dir > 0) finishAuto(); return; }
+      if (state.mode !== "scroll") return;
+      if (dir > 0 && state.p >= 1) { exploreRef.current(); return; } // at 8/8, scroll down → Impact
+      if (dir < 0 && state.p <= 0) return;                           // at 0/8, scroll up → dead end
+      const next = clamp01(state.p + (dy || dir * 120) * 0.0011);    // signed delta: down assembles / up explodes
+      if (next === state.p) return;
+      state.target = next;
+      render(next); // render writes state.p internally
+    };
+    state.startAuto = startAuto;
+    state.render = render;
+    state.finishAuto = finishAuto;
+
+    /* — keyboard (App hands keys over in the hero scene) — */
+    const onKey = (e) => {
+      if (!activeRef.current || mobileRef.current) return;
+      if (lockedRef && lockedRef.current) return;
+      if (e.key === " " || e.key === "ArrowDown" || e.key === "PageDown") { e.preventDefault(); state.wheel(1); }
+      if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); state.wheel(-1); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (state.rafId) cancelAnimationFrame(state.rafId);
+    };
+  }, []);
+
+  // —— enter / leave scene (layout effect: start playing on entry, no flash) ——
+  useL(() => {
+    const s = st.current;
+    if (!s) return;
+    if (active) {
+      if (!s.played) s.startAuto();
+      else { // re-entering Hero lands on the assembled state (8/8); scroll up to explode
+        s.mode = "scroll"; s.cineOn = false;
+        secRef.current.classList.remove("cine");
+        s.target = 1; s.render(1);
+      }
+    } else {
+      if (s.rafId) { cancelAnimationFrame(s.rafId); s.rafId = null; }
+    }
+  }, [active]);
+
+  // —— React re-renders reset className: sync imperative state back ——
+  useE(() => {
+    const s = st.current;
+    if (!s) return;
+    if (s.mode === "auto" && s.cineOn) secRef.current.classList.add("cine");
+    if (s.mode === "scroll") s.render(s.p);
+  });
+
+  const onWheel = (e) => {
+    const g = window.__wguard;
+    if (g) g.last = performance.now();      // track wheel activity for quiet detection
+    const s = st.current;
+    if (!s || mobile || !active || (lockedRef && lockedRef.current)) return;
+    if (Math.abs(e.deltaY) < 1) return;
+    // no g.lock check here: an upward gesture from Impact flows straight into the explode (App-level lock still prevents scene multi-stepping)
+    s.wheel(e.deltaY > 0 ? 1 : -1, e.deltaY);
+  };
+  const onPointerDown = () => { const s = st.current; if (s) s.finishAuto(); };
+
   return (
-    <section className={`scene hero ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
-      <div className="hero-cad" aria-hidden="true">
-        <span className="hero-ring ring-a" /><span className="hero-ring ring-b" />
-        <span className="hero-axis axis-a" /><span className="hero-axis axis-b" />
-        <span className="hero-tag tag-a">ORDER / #BL-240817</span>
-        <span className="hero-tag tag-b">INTELLIGENCE / ONLINE</span>
-        <span className="hero-tag tag-c">OUTPUT / PRODUCTION PATH</span>
-        <span className="hero-flow" />
+    <section
+      ref={secRef}
+      className={`scene hero ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`}
+      aria-hidden={!active}
+      onWheel={onWheel}
+      onPointerDown={onPointerDown}
+    >
+      <div className="hm-head"><span>FACTORY INPUT / LIVE</span><span>SHANGHAI · 2026</span></div>
+      <div className="hm-pre">
+        <p className="hm-kicker">00 · PRELUDE</p>
+        <h2>Behind every order,<br />a chain of judgments.<br /><span>We're putting intelligence inside it.</span></h2>
       </div>
-      <div className="hero-copy">
+      <div className="hm-sigs" ref={sigBoxRef} aria-hidden="true" />
+      <div className="hm-stage"><svg ref={svgRef} viewBox="0 0 1400 760" aria-label="Servo motor exploded engineering drawing" /></div>
+      <div className="hm-copy">
         <p className="eyebrow">INTELLIGENCE × MANUFACTURING</p>
         <h1>INTELLIGENCE ENTERS<br /><span className="sub">AND DOES REAL WORK.</span></h1>
-        <p className="hero-lede">Software that no longer just records production — it understands, decides, and acts. 40,000+ factories already run on Blacklake. Now, intelligence moves in.</p>
-        <div className="hero-actions">
+        <div className="hm-btns">
           <button className="btn" onClick={onExplore}>Explore what we do <span className="arw">↓</span></button>
           <button className="btn btn-paper" onClick={() => onApply("All")}>Open roles <span className="arw">↗</span></button>
         </div>
       </div>
-      <div className="scroll-cue" aria-hidden="true"><span>SCROLL · FOLLOW THE ORDER</span><i /></div>
-    </section>
-  );
-}
-
-// ═══════════ 02 One Order ═══════════
-function Order({ active, leaving, prog }) {
-  const resolvedCount = Math.min(4, Math.max(0, Math.ceil(prog * 4.7)));
-  const conv = prog > 0.55;
-  return (
-    <section className={`scene order ${active ? "is-active" : ""} ${leaving ? "leaving" : ""} ${conv ? "conv" : ""}`} aria-hidden={!active}>
-      <div className="order-grid" aria-hidden="true" />
-      <header className="order-heading">
-        <p>ONE ORDER / REAL CONSTRAINTS</p>
-        <h2>This order —<br /><span>can we take it?</span></h2>
-      </header>
-      <article className="ticket">
-        <div className="ticket-top"><span>INCOMING ORDER</span><span>17:42:08</span></div>
-        <strong>{ORDER_TICKET.no}</strong>
-        <p>{ORDER_TICKET.name}</p>
-        <div className="ticket-meta">{ORDER_TICKET.meta.map((m) => <span key={m}>{m}</span>)}</div>
-        <div className="ticket-bar" aria-hidden="true" />
-      </article>
-      <div className="decision-stream stream" aria-label="Order decision process">
-        {JUDGMENTS.map((j, i) => {
-          const on = i < resolvedCount;
-          return (
-            <div className={`node ${on ? "resolved" : ""}`} key={j.no}>
-              <div className="node-idx">{j.no}</div>
-              <div className="node-copy">
-                <span>{j.label}</span>
-                <strong>{j.value}</strong>
-                <small>{j.detail}</small>
-              </div>
-              <div className="node-state"><i />{on ? j.state : "PENDING"}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="smart" aria-hidden={!conv}>
-        <div className="smart-in">
-          {SMART_IN.map((s) => <div key={s}>{s}</div>)}
-        </div>
-        <div className="smart-core"><i /></div>
-        <div className="smart-out">
-          {SMART_OUT.map((s) => <div key={s}>{s}</div>)}
-        </div>
-      </div>
-      <p className="smart-line">{SMART_LINE}</p>
-      <div className={`verdict ${prog > 0.88 ? "resolved" : ""}`}>
-        <span>DECISION / CONFIDENCE 94%</span>
-        <strong>Yes — take it.</strong>
-        <p>Production path generated · key risk: anodizing capacity window</p>
-      </div>
-      <div className="order-progress" aria-hidden="true">
-        <span>ORDER</span>
-        <div><i style={{ width: `${Math.max(6, prog * 100)}%` }} /></div>
-        <span>DECISION</span>
-      </div>
-      <p className="order-note">Keep scrolling — let each judgment happen</p>
+      <p className="hm-hud">ASSEMBLY <b ref={cntRef}>0/8</b> · FIT ±0.02 · <b ref={okRef}>···</b></p>
+      <p className="hm-hint"><span ref={hintRef}>{HM_HINT_AUTO}</span></p>
     </section>
   );
 }
@@ -522,4 +830,4 @@ function OEEGame() {
   );
 }
 
-Object.assign(window, { Prelude, Hero, Order, Impact, Frontier, JobsScene, JobsDrawer, OEEGame });
+Object.assign(window, { Hero, Impact, Frontier, JobsScene, JobsDrawer, OEEGame });

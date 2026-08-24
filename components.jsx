@@ -1,6 +1,6 @@
 /* global React, window, CHAPTERS */
 // ============ Blacklake Careers v6 · 组件（流动的工厂） ============
-const { useState: useS, useEffect: useE, useRef: useR } = React;
+const { useState: useS, useEffect: useE, useLayoutEffect: useL, useRef: useR } = React;
 
 // ── 顶栏：品牌（单击回 Hero / 三连击触发彩蛋）+ 章节坐标 + 常驻投递口 ──
 function Nav({ scene, onChapter, onApply, lang }) {
@@ -21,8 +21,6 @@ function Nav({ scene, onChapter, onApply, lang }) {
     <nav className="topbar" aria-label="主导航">
       <button className="brand" onClick={onBrand} aria-label="黑湖招聘首页">
         <img src="logo.png" alt="黑湖科技" />
-        <span>黑湖智造</span>
-        <small>BLACKLAKE · CAREERS</small>
       </button>
       <div className="chapter-nav" aria-label="章节">
         {CHAPTERS.map((c) => (

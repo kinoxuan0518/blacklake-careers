@@ -48,51 +48,18 @@ const CATEGORIES = ["AI · 算法", "产品", "工程", "解决方案", "交付"
 // ── 章节坐标（Tab = 快速跃迁，看到同一个空间）──
 const CHAPTERS = [
   { key: "hero",     label: "INTELLIGENCE" },
-  { key: "order",    label: "ONE ORDER" },
   { key: "impact",   label: "IMPACT" },
   { key: "frontier", label: "FRONTIER" },
   { key: "jobs",     label: "JOBS" },
 ];
 
-// ── 00 Prelude：一个工厂每天要做多少判断 ──
-const SIGNALS = [
-  { kind: "ORDER",    value: "#BL-240817", meta: "精密支架 × 200",   cls: "sg-order" },
-  { kind: "DRAWING",  value: "BRKT-A17-R3", meta: "REV 03 / 14.2 MB", cls: "sg-drawing" },
-  { kind: "MATERIAL", value: "AL 6061-T6",  meta: "库存 286 KG",      cls: "sg-material" },
-  { kind: "DELIVERY", value: "72 H",        meta: "08 / 23 · 18:00",  cls: "sg-delivery" },
-  { kind: "MACHINE",  value: "CNC · A17",   meta: "可用率 86.4%",     cls: "sg-machine" },
-  { kind: "PROCESS",  value: "OP 30",       meta: "阳极氧化 / 本色",  cls: "sg-process" },
-];
-const PRELUDE_LINES = [
-  "每一个订单背后，都是一连串判断。",
-  "我们正在让智能参与其中。",
-];
-
-// ── 02 One Order：这单，能不能接 ──
-const ORDER_TICKET = {
-  no: "#BL-240817",
-  name: "新能源汽车电驱壳体支架",
-  meta: ["200 PCS", "72 H", "REV 03"],
-};
-const JUDGMENTS = [
-  { no: "01", label: "材料", value: "AL 6061-T6",     detail: "库存覆盖 1.43×",      state: "已识别" },
-  { no: "02", label: "设备", value: "CNC · A17",      detail: "预计占用 11.6h",      state: "已匹配" },
-  { no: "03", label: "工艺", value: "3轴加工 → 阳极", detail: "6 道工序 / 2 次质检", state: "已生成" },
-  { no: "04", label: "交期", value: "72 小时",        detail: "缓冲 8.4h",           state: "可承诺" },
-];
-
-// ── 03 智能节点：判断收拢 → 左入右出 ──
-const SMART_IN = ["图纸", "订单", "工厂数据", "历史经验"];
-const SMART_OUT = ["工艺建议", "设备匹配", "报价", "生产路径"];
-const SMART_LINE = "让软件从记录发生了什么，走向判断接下来该做什么。";
-
-// ── 04 Impact：数字世界 → 真实世界（真实车间抖动影像）──
+// ── 04 Impact：数字世界 → 真实世界（真实车间影像）──
 const IMPACT_SHOTS = [
-  { img: "assets/dith-mold.png", alt: "模具工装微距：精密型腔与铜套，戴手套的手正在安放零件",
+  { img: "assets/scene-mold.jpg", alt: "模具工装微距：精密型腔与铜套，戴手套的手正在安放零件",
     cap: "工装就位", read: "工单 BL-2401 · 节拍精确到秒" },
-  { img: "assets/dith-line.png", alt: "灌装产线：瓶装液体在传送带上连续流动",
+  { img: "assets/scene-line.jpg", alt: "灌装产线：瓶装液体在传送带上连续流动",
     cap: "产线执行", read: "产能 12,000/h · 数据实时回传" },
-  { img: "assets/dith-hall.png", alt: "机加工车间全景：行车、机床与阳光下的通道",
+  { img: "assets/scene-hall.jpg", alt: "机加工车间全景：行车、机床与阳光下的通道",
     cap: "全局闭环", read: "在制工单 36 · 同一张工单" },
 ];
 
@@ -117,6 +84,5 @@ const SYSTEM_FLOW = ["订单", "图纸", "INTELLIGENCE", "决策", "工厂"];
 
 Object.assign(window, {
   JOBS, CATEGORIES, RECRUIT_URL, CHAPTERS,
-  SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS,
   IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW,
 });

@@ -48,51 +48,18 @@ const CATEGORIES = ["AI · ML", "Product", "Engineering", "Solutions", "Delivery
 // ── Chapter coordinates ──
 const CHAPTERS = [
   { key: "hero",     label: "INTELLIGENCE" },
-  { key: "order",    label: "ONE ORDER" },
   { key: "impact",   label: "IMPACT" },
   { key: "frontier", label: "FRONTIER" },
   { key: "jobs",     label: "JOBS" },
 ];
 
-// ── 00 Prelude ──
-const SIGNALS = [
-  { kind: "ORDER",    value: "#BL-240817", meta: "Precision bracket × 200", cls: "sg-order" },
-  { kind: "DRAWING",  value: "BRKT-A17-R3", meta: "REV 03 / 14.2 MB",       cls: "sg-drawing" },
-  { kind: "MATERIAL", value: "AL 6061-T6",  meta: "Stock 286 KG",           cls: "sg-material" },
-  { kind: "DELIVERY", value: "72 H",        meta: "08 / 23 · 18:00",        cls: "sg-delivery" },
-  { kind: "MACHINE",  value: "CNC · A17",   meta: "Available 86.4%",        cls: "sg-machine" },
-  { kind: "PROCESS",  value: "OP 30",       meta: "Anodize / clear",        cls: "sg-process" },
-];
-const PRELUDE_LINES = [
-  "Behind every order, a chain of judgments.",
-  "We're putting intelligence inside it.",
-];
-
-// ── 02 One Order ──
-const ORDER_TICKET = {
-  no: "#BL-240817",
-  name: "EV motor-housing bracket",
-  meta: ["200 PCS", "72 H", "REV 03"],
-};
-const JUDGMENTS = [
-  { no: "01", label: "MATERIAL",  value: "AL 6061-T6",       detail: "Stock covers 1.43×",   state: "IDENTIFIED" },
-  { no: "02", label: "MACHINE",   value: "CNC · A17",        detail: "Occupied est. 11.6h",  state: "MATCHED" },
-  { no: "03", label: "PROCESS",   value: "3-axis → anodize", detail: "6 ops / 2 QC gates",   state: "GENERATED" },
-  { no: "04", label: "DELIVERY",  value: "72 hours",         detail: "Buffer 8.4h",          state: "FEASIBLE" },
-];
-
-// ── 03 Intelligence node: judgments converge — in / out ──
-const SMART_IN = ["DRAWINGS", "ORDERS", "FLOOR DATA", "EXPERIENCE"];
-const SMART_OUT = ["PROCESS PLAN", "MACHINE MATCH", "QUOTE", "PROD. PATH"];
-const SMART_LINE = "Software that recorded what happened — now decides what's next.";
-
 // ── 04 Impact ──
 const IMPACT_SHOTS = [
-  { img: "assets/dith-mold.png", alt: "Macro shot of mold tooling: precision cavity and copper bushings, a gloved hand placing a part",
+  { img: "assets/scene-mold.jpg", alt: "Macro shot of mold tooling: precision cavity and copper bushings, a gloved hand placing a part",
     cap: "Tooling set", read: "Order BL-2401 · takt to the second" },
-  { img: "assets/dith-line.png", alt: "Filling line: bottles flowing continuously on the conveyor",
+  { img: "assets/scene-line.jpg", alt: "Filling line: bottles flowing continuously on the conveyor",
     cap: "Line running", read: "12,000/h · live data feedback" },
-  { img: "assets/dith-hall.png", alt: "Machine shop panorama: crane, machines, and a sunlit aisle",
+  { img: "assets/scene-hall.jpg", alt: "Machine shop panorama: crane, machines, and a sunlit aisle",
     cap: "Closed loop", read: "36 WIP orders · one shared order" },
 ];
 
@@ -117,6 +84,5 @@ const SYSTEM_FLOW = ["ORDER", "DRAWING", "INTELLIGENCE", "DECISION", "FACTORY"];
 
 Object.assign(window, {
   JOBS, CATEGORIES, RECRUIT_URL, CHAPTERS,
-  SIGNALS, PRELUDE_LINES, ORDER_TICKET, JUDGMENTS,
   IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW,
 });
