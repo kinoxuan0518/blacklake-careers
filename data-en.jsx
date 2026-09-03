@@ -7,6 +7,7 @@ const JOBS = [
     resp: ["Train, fine-tune, and evaluate industry LLMs on Blacklake's proprietary industrial data", "Distill model capabilities into a reusable industrial-agent foundation", "Ship models onto real production lines with engineering & product, all the way to stable operation"],
     req: ["Solid LLM / deep-learning fundamentals; fluent with mainstream training & fine-tuning frameworks", "Hands-on experience with LLM deployment, RAG, Agents, or multimodal", "Willing to embed at a factory for a real scenario — not just chase benchmarks"] },
   { id: "ai-002", title: "AI Agent Engineer · Industrial Agents", team: "AI · Agents", category: "AI · ML", loc: "Shanghai", type: "Full-time", level: "P6",
+    applyUrl: "https://blacklake.jobs.feishu.cn/index/position/7564695178083649834/detail",
     desc: "Turn the factory's heaviest decisions — order splitting, scheduling, order tracking, quality inspection — into agents that act autonomously. From AI-assisted to AI-autonomous decisions.",
     resp: ["Design and build industrial agents across design / scheduling / production / quality", "Refine agent tool-use, planning, reflection, and human-in-the-loop mechanisms", "Wire agents into real work-order flows; own execution accuracy and ROI"],
     req: ["Familiar with Agent / function calling / workflow orchestration", "Strong engineering — able to turn uncertain model behavior into reliable products", "Conviction about making AI *actually do the work*, not demo it"] },
@@ -41,7 +42,9 @@ const JOBS = [
 ];
 
 // ── Feishu hiring portal ──
-const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: replace with the real Feishu hiring URL
+// ── Feishu Hire portal (all openings live in Feishu; in-site CTAs jump there) ──
+// Social-hire portal job list (58 live openings, verified 2026-09-02); campus portal at /404702
+const RECRUIT_URL = "https://blacklake.jobs.feishu.cn/index/position/list";
 
 const CATEGORIES = ["AI · ML", "Product", "Engineering", "Solutions", "Delivery", "Internship"];
 

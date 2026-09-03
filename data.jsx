@@ -7,6 +7,7 @@ const JOBS = [
     resp: ["基于黑湖独有的工业数据，做行业大模型的训练、微调与评测", "把模型能力沉淀成可复用的工业智能体底座", "与工程、产品一起把模型送进真实产线，跟到稳定可用"],
     req: ["扎实的 LLM / 深度学习功底，熟悉主流训练与微调框架", "有大模型落地、RAG、Agent、或多模态的一手经验", "愿意为了一个真实场景去工厂蹲点，而不是只看 benchmark"] },
   { id: "ai-002", title: "AI Agent 工程师 · 工业智能体", team: "AI · 智能体", category: "AI · 算法", loc: "上海", type: "全职", level: "P6",
+    applyUrl: "https://blacklake.jobs.feishu.cn/index/position/7564695178083649834/detail",
     desc: "把拆单、排程、跟单、质检这些工厂里最重的决策，做成能自主执行的工业智能体——从 AI 辅助决策，走向 AI 自主决策。",
     resp: ["设计、构建覆盖设计/排程/生产/质检的工业智能体", "打磨 Agent 的工具调用、规划、反思与人机协同机制", "把智能体接入真实工单流，对执行准确率与回报负责"],
     req: ["熟悉 Agent / function calling / workflow 编排", "工程能力强，能把不确定的模型行为做成可靠的产品", "对'让 AI 真正干活'而非'演示'有执念"] },
@@ -41,7 +42,8 @@ const JOBS = [
 ];
 
 // ── 飞书招聘官网（岗位全在飞书，站内点击跳转）──
-const RECRUIT_URL = "https://YOUR-FEISHU-RECRUIT-URL"; // TODO: 替换为真实飞书招聘官网地址
+// 社招主门户职位列表（58 个在招，2026-09-02 实测）；校招门户另有 /404702
+const RECRUIT_URL = "https://blacklake.jobs.feishu.cn/index/position/list";
 
 const CATEGORIES = ["AI · 算法", "产品", "工程", "解决方案", "交付", "实习 / 校招"];
 

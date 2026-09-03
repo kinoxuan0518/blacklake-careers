@@ -570,7 +570,7 @@ function JobsDrawer({ open, filter, onFilter, onClose }) {
         </div>
         <div className="drawer-list">
           {list.map((j, i) => (
-            <a className="djob" key={j.id} href={RECRUIT_URL} target="_blank" rel="noreferrer">
+            <a className="djob" key={j.id} href={j.applyUrl || RECRUIT_URL} target="_blank" rel="noreferrer">
               <span className="djob-no">{String(i + 1).padStart(2, "0")}</span>
               <span className="djob-copy">
                 <strong>{j.title}</strong>
