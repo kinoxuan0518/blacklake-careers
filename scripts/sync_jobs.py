@@ -166,8 +166,11 @@ def main():
     raw = fetch_jobs(headers, website_id)
     jobs = transform(raw)
 
+    # generated_at 取职位数据的最大更新时间而非当前时间：
+    # 数据无变化时两次生成的文件完全一致，避免定时任务产生空提交
+    generated = max((j["updated_at"] for j in jobs), default="")
     payload = {
-        "generated_at": __import__("datetime").datetime.now().astimezone().isoformat(timespec="seconds"),
+        "generated_at": generated,
         "website_id": website_id,
         "website_name": args.website_name,
         "count": len(jobs),
