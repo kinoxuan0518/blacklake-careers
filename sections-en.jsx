@@ -1,4 +1,4 @@
-/* global React, window, IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW, RECRUIT_URL */
+/* global React, window, IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW, RECRUIT_URL, CAT_ORDER */
 // ============ Blacklake Careers v6 · Scenes (EN · Living Factory) ============
 
 // ═══════════ 00–01 Hero: pilot light → signals converge → servo assembly → wheel-up explodes ═══════════
@@ -501,16 +501,33 @@ function Frontier({ active, leaving, onHire }) {
   );
 }
 
-// ═══════════ 07 Jobs: full mirror of Feishu Hire (jobs.json synced daily, grouped by function) ═══════════
+// ═══════════ 07 Jobs: full mirror of Feishu Hire (jobs.json synced daily, strategic functions first) ═══════════
 function catStats(jobs, useEn) {
-  const map = {};
+  const counts = {};
+  const zhOf = {};
   jobs.forEach((j) => {
-    const c = (j.cat && ((useEn && j.cat.en) || j.cat.zh)) || "Other";
-    map[c] = (map[c] || 0) + 1;
+    if (!j.cat) return;
+    const disp = (useEn && j.cat.en) || j.cat.zh;
+    counts[disp] = (counts[disp] || 0) + 1;
+    zhOf[disp] = j.cat.zh;
   });
-  return Object.entries(map)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  const order = (name) => {
+    const zh = zhOf[name];
+    const i = CAT_ORDER.indexOf(zh === undefined ? name : zh);
+    return i === -1 ? CAT_ORDER.length : i;
+  };
+  return Object.keys(counts)
+    .map((name) => ({ name, count: counts[name] }))
+    .sort((a, b) => order(a.name) - order(b.name));
+}
+
+function jobSorter() {
+  const order = (j) => {
+    const i = CAT_ORDER.indexOf(j.cat && j.cat.zh);
+    return i === -1 ? CAT_ORDER.length : i;
+  };
+  const idNum = (j) => (j.id || "");
+  return (a, b) => order(a) - order(b) || (idNum(a) < idNum(b) ? 1 : idNum(a) > idNum(b) ? -1 : 0);
 }
 
 function JobsScene({ active, leaving, onNode, jobs }) {
@@ -563,7 +580,7 @@ function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
   const cityOk = (j) => city === "All cities" ||
     (j.city || []).some((c) => (c.en || c.zh) === city || c.zh === city);
   const list = jobs.filter((j) =>
-    (!filter || filter === "All" || catOf(j) === filter) && cityOk(j));
+    (!filter || filter === "All" || catOf(j) === filter) && cityOk(j)).sort(jobSorter());
   return (
     <React.Fragment>
       <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="Close roles list" tabIndex={-1} />

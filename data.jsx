@@ -36,9 +36,14 @@ const QUESTIONS = [
   { q: "AI 到底应该建议，还是应该行动？",      tag: "PRODUCT · DESIGN",  cat: "产品" },
 ];
 
+// ── 职能类目的战略优先级（官网服务于会背调的战略岗候选人）──
+// 节点、筛选、列表均按此顺序展示：技术/产品/设计等战略职能打头，销售类靠后。
+// 与 scripts/sync_jobs.py 里 CATEGORY_RULES 的类目名保持一致。
+const CAT_ORDER = ["技术", "产品", "设计", "解决方案与交付", "客户成功", "市场", "运营", "人力", "职能", "销售"];
+
 const SYSTEM_FLOW = ["订单", "图纸", "INTELLIGENCE", "决策", "工厂"];
 
 Object.assign(window, {
-  RECRUIT_URL, CHAPTERS,
+  RECRUIT_URL, CHAPTERS, CAT_ORDER,
   IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW,
 });

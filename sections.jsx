@@ -1,4 +1,4 @@
-/* global React, window, IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW, RECRUIT_URL */
+/* global React, window, IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW, RECRUIT_URL, CAT_ORDER */
 // ============ Blacklake Careers v6 · 场景（流动的工厂） ============
 
 // ═══════════ 00–01 Hero：绿灯点火 → 信号收拢 → 伺服电机装配 → 上滑拆解 ═══════════
@@ -502,16 +502,29 @@ function Frontier({ active, leaving, onHire }) {
 }
 
 // ═══════════ 07 Jobs：你想进入哪一段 ═══════════
-// ═══════════ 07 Jobs：全量镜像飞书招聘（jobs.json 每日同步，按职能分类） ═══════════
+// ═══════════ 07 Jobs：全量镜像飞书招聘（jobs.json 每日同步，战略职能优先） ═══════════
 function catStats(jobs, useEn) {
-  const map = {};
+  const counts = {};
   jobs.forEach((j) => {
     const c = (j.cat && ((useEn && j.cat.en) || j.cat.zh)) || "其他";
-    map[c] = (map[c] || 0) + 1;
+    counts[c] = (counts[c] || 0) + 1;
   });
-  return Object.entries(map)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  const order = (zh) => {
+    const i = CAT_ORDER.indexOf(zh);
+    return i === -1 ? CAT_ORDER.length : i;
+  };
+  return Object.keys(counts)
+    .map((name) => ({ name, count: counts[name] }))
+    .sort((a, b) => order(a.name) - order(b.name));
+}
+
+function jobComparator(useEn) {
+  const order = (j) => {
+    const i = CAT_ORDER.indexOf(j.cat && j.cat.zh);
+    return i === -1 ? CAT_ORDER.length : i;
+  };
+  const idNum = (j) => (j.id || "");
+  return (a, b) => order(a) - order(b) || (idNum(a) < idNum(b) ? 1 : idNum(a) > idNum(b) ? -1 : 0);
 }
 
 function JobsScene({ active, leaving, onNode, jobs }) {
@@ -561,7 +574,7 @@ function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
   cities.sort((a, b) => (a.zh > b.zh ? 1 : -1));
   const catOk = (j) => !filter || filter === "全部" || j.cat.zh === filter || j.cat.en === filter;
   const cityOk = (j) => city === "全部城市" || (j.city || []).some((c) => c.zh === city);
-  const list = jobs.filter((j) => catOk(j) && cityOk(j));
+  const list = jobs.filter((j) => catOk(j) && cityOk(j)).sort(jobComparator());
   return (
     <React.Fragment>
       <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="关闭职位列表" tabIndex={-1} />
