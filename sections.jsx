@@ -502,12 +502,12 @@ function Frontier({ active, leaving, onHire }) {
 }
 
 // ═══════════ 07 Jobs：你想进入哪一段 ═══════════
-// ═══════════ 07 Jobs：全量镜像飞书招聘（jobs.json 每日同步） ═══════════
-function deptStats(jobs, useEn) {
+// ═══════════ 07 Jobs：全量镜像飞书招聘（jobs.json 每日同步，按职能分类） ═══════════
+function catStats(jobs, useEn) {
   const map = {};
   jobs.forEach((j) => {
-    const d = (useEn && j.dept && j.dept.en) || (j.dept && j.dept.zh) || "其他";
-    map[d] = (map[d] || 0) + 1;
+    const c = (j.cat && ((useEn && j.cat.en) || j.cat.zh)) || "其他";
+    map[c] = (map[c] || 0) + 1;
   });
   return Object.entries(map)
     .map(([name, count]) => ({ name, count }))
@@ -515,7 +515,7 @@ function deptStats(jobs, useEn) {
 }
 
 function JobsScene({ active, leaving, onNode, jobs }) {
-  const nodes = deptStats(jobs).slice(0, 8);
+  const nodes = catStats(jobs);
   return (
     <section className={`scene jobs-scene ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
       <header className="jobs-head">
@@ -552,22 +552,16 @@ function JobsScene({ active, leaving, onNode, jobs }) {
 
 // ═══════════ 职位抽屉：全量在招列表，纸的反转，30 秒可投递 ═══════════
 function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
-  const TOP_N = 8;
   const [city, setCity] = useS("全部城市");
-  const depts = deptStats(jobs);
-  const top = depts.slice(0, TOP_N);
-  const topNames = new Set(top.map((d) => d.name));
-  const otherCount = depts.slice(TOP_N).reduce((s, d) => s + d.count, 0);
+  const cats = catStats(jobs);
   const cities = [];
   jobs.forEach((j) => (j.city || []).forEach((c) => {
     if (c.zh && !cities.some((x) => x.zh === c.zh)) cities.push(c);
   }));
   cities.sort((a, b) => (a.zh > b.zh ? 1 : -1));
-  const deptOk = (j) =>
-    !filter || filter === "全部" ||
-    (filter === "其他" ? !topNames.has(j.dept.zh) : j.dept.zh === filter);
+  const catOk = (j) => !filter || filter === "全部" || j.cat.zh === filter || j.cat.en === filter;
   const cityOk = (j) => city === "全部城市" || (j.city || []).some((c) => c.zh === city);
-  const list = jobs.filter((j) => deptOk(j) && cityOk(j));
+  const list = jobs.filter((j) => catOk(j) && cityOk(j));
   return (
     <React.Fragment>
       <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="关闭职位列表" tabIndex={-1} />
@@ -584,16 +578,11 @@ function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
           <button className={filter === "全部" ? "selected" : ""} onClick={() => onFilter("全部")}>
             全部 {jobs.length}
           </button>
-          {top.map((d) => (
-            <button key={d.name} className={filter === d.name ? "selected" : ""} onClick={() => onFilter(d.name)}>
-              {d.name} {d.count}
+          {cats.map((c) => (
+            <button key={c.name} className={filter === c.name ? "selected" : ""} onClick={() => onFilter(c.name)}>
+              {c.name} {c.count}
             </button>
           ))}
-          {otherCount > 0 && (
-            <button className={filter === "其他" ? "selected" : ""} onClick={() => onFilter("其他")}>
-              其他 {otherCount}
-            </button>
-          )}
           <select className="city-select" value={city} onChange={(e) => setCity(e.target.value)} aria-label="按城市筛选">
             <option value="全部城市">全部城市</option>
             {cities.map((c) => (

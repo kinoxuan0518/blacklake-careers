@@ -25,6 +25,29 @@ PORTAL_URL_TPL = "https://blacklake.jobs.feishu.cn/index/position/{id}/detail"
 OUTPUT = os.path.join(os.path.dirname(__file__), "..", "jobs.json")
 DEFAULT_WEBSITE_NAME = "社招官网"
 
+# 职能分类：按标题关键词从上到下首个命中（顺序敏感，勿随意调换）
+# 例：「KA项目经理」须先于「销售」命中「项目经理」；「实施顾问」归客户成功而非交付
+CATEGORY_RULES = [
+    ("技术",         "Technology",          ["工程师", "算法", "开发", "架构", "前端", "后端", "AI"]),
+    ("产品",         "Product",             ["产品经理", "产品总监", "产品"]),
+    ("客户成功",     "Customer Success",    ["客户成功", "实施", "客户经理"]),
+    ("解决方案与交付", "Solutions & Delivery", ["解决方案", "项目经理", "项目顾问", "交付", "质量控制"]),
+    ("销售",         "Sales",               ["销售", "渠道经理", "大客户", "电销", "KA", "商务"]),
+    ("市场",         "Marketing",           ["市场", "品牌", "增长"]),
+    ("运营",         "Operations",          ["运营"]),
+    ("人力",         "People / HR",         ["hr", "人力资源", "招聘", "人才发展"]),
+    ("设计",         "Design",              ["设计师", "设计", "ue", "ux", "视觉"]),
+    ("职能",         "Corporate Functions", ["会计", "财务", "采购", "法务", "行政"]),
+]
+
+
+def classify(title):
+    t = (title or "").lower()
+    for zh, en, kws in CATEGORY_RULES:
+        if any(kw.lower() in t for kw in kws):
+            return {"zh": zh, "en": en}
+    return {"zh": "其他", "en": "Other"}
+
 
 def http_json(url, params=None, headers=None, data=None):
     if params:
@@ -121,6 +144,7 @@ def transform(raw):
             "id": it.get("id"),
             "code": it.get("job_code") or "",
             "title": it.get("title") or "",
+            "cat": classify(it.get("title")),
             "dept": dept,
             "city": cities,
             "url": PORTAL_URL_TPL.format(id=it.get("id")),

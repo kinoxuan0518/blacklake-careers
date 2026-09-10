@@ -501,12 +501,12 @@ function Frontier({ active, leaving, onHire }) {
   );
 }
 
-// ═══════════ 07 Jobs: full mirror of Feishu Hire (jobs.json synced daily) ═══════════
-function deptStats(jobs, useEn) {
+// ═══════════ 07 Jobs: full mirror of Feishu Hire (jobs.json synced daily, grouped by function) ═══════════
+function catStats(jobs, useEn) {
   const map = {};
   jobs.forEach((j) => {
-    const d = (useEn && j.dept && j.dept.en) || (j.dept && j.dept.zh) || "其他";
-    map[d] = (map[d] || 0) + 1;
+    const c = (j.cat && ((useEn && j.cat.en) || j.cat.zh)) || "Other";
+    map[c] = (map[c] || 0) + 1;
   });
   return Object.entries(map)
     .map(([name, count]) => ({ name, count }))
@@ -514,7 +514,7 @@ function deptStats(jobs, useEn) {
 }
 
 function JobsScene({ active, leaving, onNode, jobs }) {
-  const nodes = deptStats(jobs, true).slice(0, 8);
+  const nodes = catStats(jobs, true);
   return (
     <section className={`scene jobs-scene ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
       <header className="jobs-head">
@@ -549,26 +549,21 @@ function JobsScene({ active, leaving, onNode, jobs }) {
   );
 }
 
-// ═══════════ Jobs drawer: full live list, paper inversion, apply in 30 seconds ═══════════
+// ═══════════ Jobs drawer: full live list grouped by function, paper inversion, apply in 30 seconds ═══════════
 function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
-  const TOP_N = 8;
-  const [city, setCity] = useS("全部城市");
-  const depts = deptStats(jobs, true);
-  const top = depts.slice(0, TOP_N);
-  const topNames = new Set(top.map((d) => d.name));
-  const otherCount = depts.slice(TOP_N).reduce((s, d) => s + d.count, 0);
+  const [city, setCity] = useS("All cities");
+  const cats = catStats(jobs, true);
   const cities = [];
   jobs.forEach((j) => (j.city || []).forEach((c) => {
     const label = c.en || c.zh;
-    if (label && !cities.some((x) => x.label === label)) cities.push({ label, zh: c.zh, en: c.en });
+    if (label && !cities.some((x) => x.label === label)) cities.push({ label });
   }));
   cities.sort((a, b) => (a.label > b.label ? 1 : -1));
-  const deptOf = (j) => (j.dept && (j.dept.en || j.dept.zh)) || "其他";
-  const cityOk = (j) => city === "全部城市" ||
+  const catOf = (j) => (j.cat && (j.cat.en || j.cat.zh)) || "Other";
+  const cityOk = (j) => city === "All cities" ||
     (j.city || []).some((c) => (c.en || c.zh) === city || c.zh === city);
   const list = jobs.filter((j) =>
-    (!filter || filter === "All" ||
-      (filter === "Others" ? !topNames.has(deptOf(j)) : deptOf(j) === filter)) && cityOk(j));
+    (!filter || filter === "All" || catOf(j) === filter) && cityOk(j));
   return (
     <React.Fragment>
       <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="Close roles list" tabIndex={-1} />
@@ -585,18 +580,13 @@ function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
           <button className={filter === "All" ? "selected" : ""} onClick={() => onFilter("All")}>
             All {jobs.length}
           </button>
-          {top.map((d) => (
-            <button key={d.name} className={filter === d.name ? "selected" : ""} onClick={() => onFilter(d.name)}>
-              {d.name} {d.count}
+          {cats.map((c) => (
+            <button key={c.name} className={filter === c.name ? "selected" : ""} onClick={() => onFilter(c.name)}>
+              {c.name} {c.count}
             </button>
           ))}
-          {otherCount > 0 && (
-            <button className={filter === "Others" ? "selected" : ""} onClick={() => onFilter("Others")}>
-              Others {otherCount}
-            </button>
-          )}
           <select className="city-select" value={city} onChange={(e) => setCity(e.target.value)} aria-label="Filter by city">
-            <option value="全部城市">All cities</option>
+            <option value="All cities">All cities</option>
             {cities.map((c) => (
               <option key={c.label} value={c.label}>{c.label}</option>
             ))}
@@ -609,7 +599,7 @@ function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
               <span className="djob-copy">
                 <strong>{j.title}</strong>
                 <small>
-                  {deptOf(j)}
+                  {(j.dept && (j.dept.en || j.dept.zh)) || ""}
                   {j.city && j.city.length ? " · " + j.city.map((c) => c.en || c.zh).join(" / ") : ""}
                 </small>
               </span>

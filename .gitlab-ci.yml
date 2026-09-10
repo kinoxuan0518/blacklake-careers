@@ -1,9 +1,40 @@
-# 职位数据定时同步（见 SYNC.md）
-# 只在 scheduled pipeline 触发时运行；普通 push 不跑任何 CI（纯静态站无构建）。
-# 首次启用需在 GitLab 配置 CI Variables 与 schedule，步骤见 SYNC.md。
+stages:
+  - test
+  - prod
+  - sync
 
+variables:
+  GIT_STRATEGY: none
+
+# ─── 测试环境：push main 自动部署（陈继强 2026-09-09 配置）───
+deploy-test:
+  stage: test
+  only:
+    - main
+  script:
+    - sudo /root/job-update-test.sh
+  tags:
+    - www
+
+# ─── 生产环境：手动点击部署 ───
+deploy-prod:
+  stage: prod
+  only:
+    - main
+  when: manual
+  script:
+    - sudo /root/job-update-prod.sh
+  tags:
+    - www
+
+# ─── 职位数据定时同步（配置步骤见 SYNC.md）───
+# 定时/手动触发：拉取飞书招聘在招职位 → jobs.json 有变化则提交推送；
+# 推送会再次触发上面的 deploy-test，实现「职位更新 → 测试站自动刷新」闭环。
 sync-jobs:
+  stage: sync
   image: python:3.11-slim
+  variables:
+    GIT_STRATEGY: fetch          # 覆盖全局 none：本 job 需要 checkout 才能提交
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"        # 允许手动 Run now 验证
@@ -11,7 +42,7 @@ sync-jobs:
     - git config --global user.name "blacklake-careers-bot"
     - git config --global user.email "bot@blacklake-careers.gitlab"
     - git config --global --add safe.directory "$CI_PROJECT_DIR"
-    # GitLab checkout 用的是 CI_JOB_TOKEN 只读凭据，换成可推送的 Project Access Token
+    # checkout 用的是只读 CI_JOB_TOKEN，换成可推送的 Project Access Token（CI Variables：GL_PUSH_TOKEN）
     - git remote set-url origin "https://oauth2:${GL_PUSH_TOKEN}@gitlab.blacklake.tech/xuanzhenglong/blacklake-careers.git"
   script:
     - python3 scripts/sync_jobs.py            # 读取 FEISHU_APP_ID / FEISHU_APP_SECRET
@@ -20,13 +51,7 @@ sync-jobs:
         echo "职位数据无变化，跳过提交"
       else
         git add jobs.json
-        git commit -m "sync: 飞书招聘在招职位自动同步 [skip ci]"
+        git commit -m "sync: 飞书招聘在招职位自动同步"
         git push origin HEAD:main
-        echo "jobs.json 已更新并推送"
+        echo "jobs.json 已更新并推送（将自动触发测试环境部署）"
       fi
-  # 可选：同步推送到 GitHub 镜像（线上 GitHub Pages 用）。
-  # 启用前在 CI Variables 配置 GH_PUSH_TOKEN（GitHub PAT，repo 权限），并取消下方注释：
-  # after_script:
-  #   - if git diff --quiet HEAD~1 -- jobs.json; then exit 0; fi
-  #   - git remote add github "https://kinoxuan0518:${GH_PUSH_TOKEN}@github.com/kinoxuan0518/blacklake-careers.git"
-  #   - git push github HEAD:main
