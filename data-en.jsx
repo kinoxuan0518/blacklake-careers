@@ -39,7 +39,7 @@ const QUESTIONS = [
 // ── Strategic priority of function categories (the site serves research-savvy,
 //    strategic-role candidates; tech/product lead, sales last) ──
 // Keys must stay in sync with CATEGORY_RULES in scripts/sync_jobs.py.
-const CAT_ORDER = ["技术", "产品", "设计", "解决方案与交付", "客户成功", "市场", "运营", "人力", "职能", "销售"];
+const CAT_ORDER = ["技术", "产品", "设计", "解决方案与交付", "客户成功", "市场", "运营", "职能", "销售"];
 
 const SYSTEM_FLOW = ["ORDER", "DRAWING", "INTELLIGENCE", "DECISION", "FACTORY"];
 
