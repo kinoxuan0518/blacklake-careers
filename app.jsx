@@ -25,8 +25,17 @@ function App() {
   const [drawer, setDrawer] = useS({ open: false, filter: "全部" });
   const [leaving, setLeaving] = useS(null); // 正在离场（变形过渡中）的场景
   const [mobile, setMobile] = useS(() => window.matchMedia("(max-width: 720px)").matches);
+  const [jobs, setJobs] = useS([]);         // 全量在招职位（jobs.json，飞书招聘同步）
   const drawerLock = useR(false);           // 给 Hero 的实时抽屉状态（走 ref，不触发重渲染）
   drawerLock.current = drawer.open;
+
+  // 职位全量镜像：启动时拉取同步数据，失败则保持空列表（筛选区自动为空态）
+  useE(() => {
+    fetch("jobs.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && Array.isArray(d.jobs)) setJobs(d.jobs); })
+      .catch(() => {});
+  }, []);
 
   // 移动端：回退为纵向滚动，场景全部展开
   useE(() => {
@@ -89,8 +98,8 @@ function App() {
       <Hero active={scene === "hero"} leaving={leaving === "hero"} onExplore={() => go("impact")} onApply={openDrawer} mobile={mobile} lockedRef={drawerLock} />
       <Impact active={mobile || scene === "impact"} leaving={leaving === "impact"} />
       <Frontier active={mobile || scene === "frontier"} leaving={leaving === "frontier"} onHire={openDrawer} />
-      <JobsScene active={mobile || scene === "jobs"} leaving={leaving === "jobs"} onNode={openDrawer} />
-      <JobsDrawer open={drawer.open} filter={drawer.filter} onFilter={setFilter} onClose={closeDrawer} />
+      <JobsScene active={mobile || scene === "jobs"} leaving={leaving === "jobs"} onNode={openDrawer} jobs={jobs} />
+      <JobsDrawer open={drawer.open} filter={drawer.filter} onFilter={setFilter} onClose={closeDrawer} jobs={jobs} />
       <FrameCorners />
       <OEEGame />
     </main>

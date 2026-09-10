@@ -1,4 +1,4 @@
-/* global React, window, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
+/* global React, window, IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW, RECRUIT_URL */
 // ============ Blacklake Careers v6 · Scenes (EN · Living Factory) ============
 
 // ═══════════ 00–01 Hero: pilot light → signals converge → servo assembly → wheel-up explodes ═══════════
@@ -501,12 +501,24 @@ function Frontier({ active, leaving, onHire }) {
   );
 }
 
-// ═══════════ 07 Jobs ═══════════
-function JobsScene({ active, leaving, onNode }) {
+// ═══════════ 07 Jobs: full mirror of Feishu Hire (jobs.json synced daily) ═══════════
+function deptStats(jobs, useEn) {
+  const map = {};
+  jobs.forEach((j) => {
+    const d = (useEn && j.dept && j.dept.en) || (j.dept && j.dept.zh) || "其他";
+    map[d] = (map[d] || 0) + 1;
+  });
+  return Object.entries(map)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function JobsScene({ active, leaving, onNode, jobs }) {
+  const nodes = deptStats(jobs, true).slice(0, 8);
   return (
     <section className={`scene jobs-scene ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
       <header className="jobs-head">
-        <p>JOBS / FIND WHERE YOU FIT</p>
+        <p>JOBS / LIVE FROM FEISHU HIRE</p>
         <h2>Which part of this system <span>do you want to build?</span></h2>
       </header>
       <div className="sysflow" aria-hidden="true">
@@ -518,20 +530,16 @@ function JobsScene({ active, leaving, onNode }) {
         ))}
       </div>
       <div className="job-nodes">
-        {JOB_NODES.map((n) => {
-          const count = JOBS.filter((j) => j.category === n.cat).length;
-          return (
-            <button className="job-node" key={n.cat} onClick={() => onNode(n.cat)}>
-              <span className="jn-en">{n.en}</span>
-              <span className="jn-cat">{n.cat}</span>
-              <span className="jn-note">{n.note}</span>
-              <span className="jn-meta">
-                <span className="jn-count">{count} open {count > 1 ? "roles" : "role"}</span>
-                <span className="jn-go">Enter ↗</span>
-              </span>
-            </button>
-          );
-        })}
+        {nodes.map((n) => (
+          <button className="job-node" key={n.name} onClick={() => onNode(n.name)}>
+            <span className="jn-en">{String(n.count).padStart(2, "0")} OPEN</span>
+            <span className="jn-cat">{n.name}</span>
+            <span className="jn-meta">
+              <span className="jn-count">{n.count} open {n.count > 1 ? "roles" : "role"}</span>
+              <span className="jn-go">Enter ↗</span>
+            </span>
+          </button>
+        ))}
       </div>
       <div className="jobs-foot">
         <a href="mailto:careers@blacklake.cn">careers@blacklake.cn →</a>
@@ -541,11 +549,26 @@ function JobsScene({ active, leaving, onNode }) {
   );
 }
 
-// ═══════════ Jobs drawer ═══════════
-function JobsDrawer({ open, filter, onFilter, onClose }) {
-  const counts = {};
-  JOBS.forEach((j) => { counts[j.category] = (counts[j.category] || 0) + 1; });
-  const list = filter === "All" ? JOBS : JOBS.filter((j) => j.category === filter);
+// ═══════════ Jobs drawer: full live list, paper inversion, apply in 30 seconds ═══════════
+function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
+  const TOP_N = 8;
+  const [city, setCity] = useS("全部城市");
+  const depts = deptStats(jobs, true);
+  const top = depts.slice(0, TOP_N);
+  const topNames = new Set(top.map((d) => d.name));
+  const otherCount = depts.slice(TOP_N).reduce((s, d) => s + d.count, 0);
+  const cities = [];
+  jobs.forEach((j) => (j.city || []).forEach((c) => {
+    const label = c.en || c.zh;
+    if (label && !cities.some((x) => x.label === label)) cities.push({ label, zh: c.zh, en: c.en });
+  }));
+  cities.sort((a, b) => (a.label > b.label ? 1 : -1));
+  const deptOf = (j) => (j.dept && (j.dept.en || j.dept.zh)) || "其他";
+  const cityOk = (j) => city === "全部城市" ||
+    (j.city || []).some((c) => (c.en || c.zh) === city || c.zh === city);
+  const list = jobs.filter((j) =>
+    (!filter || filter === "All" ||
+      (filter === "Others" ? !topNames.has(deptOf(j)) : deptOf(j) === filter)) && cityOk(j));
   return (
     <React.Fragment>
       <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="Close roles list" tabIndex={-1} />
@@ -557,29 +580,43 @@ function JobsDrawer({ open, filter, onFilter, onClose }) {
           </div>
           <button className="drawer-close" onClick={onClose}>Close ×</button>
         </div>
-        <p className="drawer-intro">Work on real factory floors, on questions AI hasn't answered yet. Click a role to apply via Feishu Hiring.</p>
+        <p className="drawer-intro">All live openings, synced daily from Feishu Hire. Click a role to apply.</p>
         <div className="drawer-filters">
           <button className={filter === "All" ? "selected" : ""} onClick={() => onFilter("All")}>
-            All {JOBS.length}
+            All {jobs.length}
           </button>
-          {CATEGORIES.map((c) => (
-            <button key={c} className={filter === c ? "selected" : ""} onClick={() => onFilter(c)}>
-              {c} {counts[c] || 0}
+          {top.map((d) => (
+            <button key={d.name} className={filter === d.name ? "selected" : ""} onClick={() => onFilter(d.name)}>
+              {d.name} {d.count}
             </button>
           ))}
+          {otherCount > 0 && (
+            <button className={filter === "Others" ? "selected" : ""} onClick={() => onFilter("Others")}>
+              Others {otherCount}
+            </button>
+          )}
+          <select className="city-select" value={city} onChange={(e) => setCity(e.target.value)} aria-label="Filter by city">
+            <option value="全部城市">All cities</option>
+            {cities.map((c) => (
+              <option key={c.label} value={c.label}>{c.label}</option>
+            ))}
+          </select>
         </div>
         <div className="drawer-list">
           {list.map((j, i) => (
-            <a className="djob" key={j.id} href={j.applyUrl || RECRUIT_URL} target="_blank" rel="noreferrer">
+            <a className="djob compact" key={j.id} href={j.url || RECRUIT_URL} target="_blank" rel="noreferrer">
               <span className="djob-no">{String(i + 1).padStart(2, "0")}</span>
               <span className="djob-copy">
                 <strong>{j.title}</strong>
-                <small>{j.loc} · {j.category} · {j.type} · {j.level}</small>
-                <p>{j.desc}</p>
+                <small>
+                  {deptOf(j)}
+                  {j.city && j.city.length ? " · " + j.city.map((c) => c.en || c.zh).join(" / ") : ""}
+                </small>
               </span>
               <span className="djob-arrow">↗</span>
             </a>
           ))}
+          {list.length === 0 && <p className="drawer-empty">No open roles under this filter</p>}
         </div>
         <p className="drawer-foot">Applications via Feishu Hiring · résumés go straight to hiring teams</p>
       </aside>

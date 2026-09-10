@@ -25,8 +25,17 @@ function App() {
   const [drawer, setDrawer] = useS({ open: false, filter: "All" });
   const [leaving, setLeaving] = useS(null); // scene currently in leaving transition
   const [mobile, setMobile] = useS(() => window.matchMedia("(max-width: 720px)").matches);
+  const [jobs, setJobs] = useS([]);         // full live roles (jobs.json, synced from Feishu Hire)
   const drawerLock = useR(false);           // live drawer state for Hero (ref, no re-render)
   drawerLock.current = drawer.open;
+
+  // Full job mirror: fetch synced data on boot; on failure keep an empty list
+  useE(() => {
+    fetch("jobs.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && Array.isArray(d.jobs)) setJobs(d.jobs); })
+      .catch(() => {});
+  }, []);
 
   // Mobile: fall back to vertical scroll with all scenes expanded
   useE(() => {
@@ -89,8 +98,8 @@ function App() {
       <Hero active={scene === "hero"} leaving={leaving === "hero"} onExplore={() => go("impact")} onApply={openDrawer} mobile={mobile} lockedRef={drawerLock} />
       <Impact active={mobile || scene === "impact"} leaving={leaving === "impact"} />
       <Frontier active={mobile || scene === "frontier"} leaving={leaving === "frontier"} onHire={openDrawer} />
-      <JobsScene active={mobile || scene === "jobs"} leaving={leaving === "jobs"} onNode={openDrawer} />
-      <JobsDrawer open={drawer.open} filter={drawer.filter} onFilter={setFilter} onClose={closeDrawer} />
+      <JobsScene active={mobile || scene === "jobs"} leaving={leaving === "jobs"} onNode={openDrawer} jobs={jobs} />
+      <JobsDrawer open={drawer.open} filter={drawer.filter} onFilter={setFilter} onClose={closeDrawer} jobs={jobs} />
       <FrameCorners />
       <OEEGame />
     </main>

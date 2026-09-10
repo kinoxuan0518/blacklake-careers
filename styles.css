@@ -503,3 +503,18 @@ html[lang="en"] .djob strong{font-size:12px}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .grain{display:none}
 }
+
+/* ============================================================
+   全量职位镜像（jobs.json · 飞书招聘每日同步）
+   ============================================================ */
+.djob.compact{padding:13px 0}
+.djob.compact strong{font-size:19px}
+.djob.compact small{margin:5px 0 0}
+.djob.compact .djob-arrow{align-self:center}
+.drawer-empty{padding:26px 0;color:#747873;font-size:13px}
+select.city-select{
+  margin-left:auto;padding:7px 10px;
+  border:1px solid rgba(10,12,11,.2);background:transparent;border-radius:0;
+  font-size:12px;color:#0A0C0B;cursor:pointer;
+}
+select.city-select:focus{outline:1px solid #0A0C0B;outline-offset:2px}

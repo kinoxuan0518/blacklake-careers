@@ -1,0 +1,32 @@
+# 职位数据定时同步（见 SYNC.md）
+# 只在 scheduled pipeline 触发时运行；普通 push 不跑任何 CI（纯静态站无构建）。
+# 首次启用需在 GitLab 配置 CI Variables 与 schedule，步骤见 SYNC.md。
+
+sync-jobs:
+  image: python:3.11-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"        # 允许手动 Run now 验证
+  before_script:
+    - git config --global user.name "blacklake-careers-bot"
+    - git config --global user.email "bot@blacklake-careers.gitlab"
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+    # GitLab checkout 用的是 CI_JOB_TOKEN 只读凭据，换成可推送的 Project Access Token
+    - git remote set-url origin "https://oauth2:${GL_PUSH_TOKEN}@gitlab.blacklake.tech/xuanzhenglong/blacklake-careers.git"
+  script:
+    - python3 scripts/sync_jobs.py            # 读取 FEISHU_APP_ID / FEISHU_APP_SECRET
+    - |
+      if git diff --quiet -- jobs.json; then
+        echo "职位数据无变化，跳过提交"
+      else
+        git add jobs.json
+        git commit -m "sync: 飞书招聘在招职位自动同步 [skip ci]"
+        git push origin HEAD:main
+        echo "jobs.json 已更新并推送"
+      fi
+  # 可选：同步推送到 GitHub 镜像（线上 GitHub Pages 用）。
+  # 启用前在 CI Variables 配置 GH_PUSH_TOKEN（GitHub PAT，repo 权限），并取消下方注释：
+  # after_script:
+  #   - if git diff --quiet HEAD~1 -- jobs.json; then exit 0; fi
+  #   - git remote add github "https://kinoxuan0518:${GH_PUSH_TOKEN}@github.com/kinoxuan0518/blacklake-careers.git"
+  #   - git push github HEAD:main

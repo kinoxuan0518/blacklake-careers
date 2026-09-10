@@ -1,0 +1,994 @@
+{
+  "generated_at": "2026-09-10T10:36:13+08:00",
+  "website_id": "6976825782060747038",
+  "website_name": "社招官网",
+  "count": 58,
+  "jobs": [
+    {
+      "id": "7041460866340325663",
+      "code": "KSSV",
+      "title": "渠道经理",
+      "dept": {
+        "zh": "上海大区",
+        "en": "上海大区"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7041460866340325663/detail",
+      "updated_at": "2021-12-14 15:46"
+    },
+    {
+      "id": "7217775363458353445",
+      "code": "A79731",
+      "title": "销售顾问（小工单）-沪锡直销",
+      "dept": {
+        "zh": "上海直销",
+        "en": "上海直销"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7217775363458353445/detail",
+      "updated_at": "2024-10-12 10:37"
+    },
+    {
+      "id": "7272941613923567933",
+      "code": "A142774",
+      "title": "智造-KA项目经理",
+      "dept": {
+        "zh": "交付一队",
+        "en": "交付一队"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7272941613923567933/detail",
+      "updated_at": "2026-06-30 19:23"
+    },
+    {
+      "id": "6976884948238944516",
+      "code": "9NBP",
+      "title": "HRG",
+      "dept": {
+        "zh": "人才发展部",
+        "en": "人才发展部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6976884948238944516/detail",
+      "updated_at": "2021-06-23 15:19"
+    },
+    {
+      "id": "6980515576646011166",
+      "code": "JHFYP",
+      "title": "招聘专家",
+      "dept": {
+        "zh": "人才发展部",
+        "en": "人才发展部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980515576646011166/detail",
+      "updated_at": "2025-09-11 17:23"
+    },
+    {
+      "id": "7564695178083649834",
+      "code": "A18855",
+      "title": "agent开发工程师-星闪",
+      "dept": {
+        "zh": "供应链业务线",
+        "en": "供应链业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7564695178083649834/detail",
+      "updated_at": "2026-06-04 12:06"
+    },
+    {
+      "id": "7137867760281340196",
+      "code": "J8923",
+      "title": "供应链-项目顾问/经理",
+      "dept": {
+        "zh": "供应链业务线",
+        "en": "供应链业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7137867760281340196/detail",
+      "updated_at": "2022-08-31 10:56"
+    },
+    {
+      "id": "6981692551724894472",
+      "code": "254P",
+      "title": "智造-大客户销售经理-华北",
+      "dept": {
+        "zh": "商业化",
+        "en": "商业化"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6981692551724894472/detail",
+      "updated_at": "2024-08-05 16:22"
+    },
+    {
+      "id": "6981694563719448845",
+      "code": "V54P",
+      "title": "智造-大客户销售经理-浙沪",
+      "dept": {
+        "zh": "商业化",
+        "en": "商业化"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6981694563719448845/detail",
+      "updated_at": "2024-08-05 16:21"
+    },
+    {
+      "id": "6981693938295294221",
+      "code": "JUD4P",
+      "title": "智造-大客户销售经理-苏皖",
+      "dept": {
+        "zh": "商业化",
+        "en": "商业化"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6981693938295294221/detail",
+      "updated_at": "2024-08-05 16:22"
+    },
+    {
+      "id": "6981694319824636171",
+      "code": "JRG4P",
+      "title": "智造-大客户销售（华南）",
+      "dept": {
+        "zh": "商业化",
+        "en": "商业化"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6981694319824636171/detail",
+      "updated_at": "2025-10-16 19:37"
+    },
+    {
+      "id": "6981696428271831326",
+      "code": "JFF4P",
+      "title": "销售顾问-福建",
+      "dept": {
+        "zh": "外部销售",
+        "en": "外部销售"
+      },
+      "city": [
+        {
+          "zh": "厦门",
+          "en": "Xiamen"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6981696428271831326/detail",
+      "updated_at": "2021-07-06 14:29"
+    },
+    {
+      "id": "6981692984082794782",
+      "code": "JU54P",
+      "title": "销售顾问-郑州",
+      "dept": {
+        "zh": "外部销售",
+        "en": "外部销售"
+      },
+      "city": [
+        {
+          "zh": "北京",
+          "en": "Beijing"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6981692984082794782/detail",
+      "updated_at": "2021-07-06 14:16"
+    },
+    {
+      "id": "6980549762160970020",
+      "code": "JDHYP",
+      "title": "华北实施顾问/经理-智造",
+      "dept": {
+        "zh": "客户成功部",
+        "en": "客户成功部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980549762160970020/detail",
+      "updated_at": "2025-12-30 11:31"
+    },
+    {
+      "id": "6980554777688148257",
+      "code": "AXYP",
+      "title": "实施顾问-闽赣",
+      "dept": {
+        "zh": "客户成功部",
+        "en": "客户成功部"
+      },
+      "city": [
+        {
+          "zh": "厦门",
+          "en": "Xiamen"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980554777688148257/detail",
+      "updated_at": "2021-07-03 12:38"
+    },
+    {
+      "id": "6980549762748287239",
+      "code": "JLXYP",
+      "title": "智造-实施顾问/经理-华东",
+      "dept": {
+        "zh": "客户成功部",
+        "en": "客户成功部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980549762748287239/detail",
+      "updated_at": "2026-01-07 12:52"
+    },
+    {
+      "id": "6980541983799052558",
+      "code": "WFYP",
+      "title": "智造-实施顾问/经理-华南",
+      "dept": {
+        "zh": "客户成功部",
+        "en": "客户成功部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980541983799052558/detail",
+      "updated_at": "2026-04-02 15:53"
+    },
+    {
+      "id": "7089319008068421892",
+      "code": "99CL",
+      "title": "质量控制顾问",
+      "dept": {
+        "zh": "客户经理",
+        "en": "客户经理"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7089319008068421892/detail",
+      "updated_at": "2022-04-22 15:02"
+    },
+    {
+      "id": "7095545041829497124",
+      "code": "JQJ9L",
+      "title": "客户成功顾问-小工单-华南",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7095545041829497124/detail",
+      "updated_at": "2024-12-11 19:20"
+    },
+    {
+      "id": "7085595539743688967",
+      "code": "JYKKL",
+      "title": "客户成功顾问-小工单-浙闽",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7085595539743688967/detail",
+      "updated_at": "2025-05-26 11:37"
+    },
+    {
+      "id": "7086694615432055079",
+      "code": "JJK6L",
+      "title": "客户成功顾问-小工单-苏皖",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7086694615432055079/detail",
+      "updated_at": "2025-05-26 11:36"
+    },
+    {
+      "id": "6980560174382401828",
+      "code": "XFYP",
+      "title": "渠道经理（小工单）-华南",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980560174382401828/detail",
+      "updated_at": "2021-07-03 13:06"
+    },
+    {
+      "id": "6980563837331212551",
+      "code": "5HYP",
+      "title": "线上客户成功-小工单-上海",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980563837331212551/detail",
+      "updated_at": "2024-12-02 11:01"
+    },
+    {
+      "id": "7196923671947036986",
+      "code": "C7999",
+      "title": "销售顾问（小工单）-东莞1组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196923671947036986/detail",
+      "updated_at": "2023-02-06 14:20"
+    },
+    {
+      "id": "7261815570243455269",
+      "code": "A10752",
+      "title": "销售顾问（小工单）-东莞2组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261815570243455269/detail",
+      "updated_at": "2023-07-31 11:15"
+    },
+    {
+      "id": "7196923816668154171",
+      "code": "R6732",
+      "title": "销售顾问（小工单）-中江",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196923816668154171/detail",
+      "updated_at": "2024-05-06 11:39"
+    },
+    {
+      "id": "7261817918815586621",
+      "code": "A31235",
+      "title": "销售顾问（小工单）-台州",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261817918815586621/detail",
+      "updated_at": "2023-07-31 11:24"
+    },
+    {
+      "id": "7088141999739685152",
+      "code": "5F6L",
+      "title": "销售顾问（小工单）-宁波1组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7088141999739685152/detail",
+      "updated_at": "2022-04-19 10:51"
+    },
+    {
+      "id": "7261830315790027045",
+      "code": "A72415",
+      "title": "销售顾问（小工单）-宁波2组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261830315790027045/detail",
+      "updated_at": "2023-07-31 12:14"
+    },
+    {
+      "id": "6980554227883444484",
+      "code": "JXDYP",
+      "title": "销售顾问（小工单）-常州",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980554227883444484/detail",
+      "updated_at": "2021-07-03 12:37"
+    },
+    {
+      "id": "7267082441118304567",
+      "code": "A145538",
+      "title": "销售顾问（小工单）-广佛",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7267082441118304567/detail",
+      "updated_at": "2026-04-21 20:45"
+    },
+    {
+      "id": "7261816431884912952",
+      "code": "A45578",
+      "title": "销售顾问（小工单）-津冀鲁",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261816431884912952/detail",
+      "updated_at": "2023-07-31 11:20"
+    },
+    {
+      "id": "7196928837128866106",
+      "code": "N1957",
+      "title": "销售顾问（小工单）-浙上",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196928837128866106/detail",
+      "updated_at": "2023-02-06 14:41"
+    },
+    {
+      "id": "6980553345745570059",
+      "code": "JCXYP",
+      "title": "销售顾问（小工单）-浙沪",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980553345745570059/detail",
+      "updated_at": "2021-07-03 12:35"
+    },
+    {
+      "id": "7261814965676804412",
+      "code": "A08751",
+      "title": "销售顾问（小工单）-深圳直销",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261814965676804412/detail",
+      "updated_at": "2024-05-15 13:23"
+    },
+    {
+      "id": "7196923114272672037",
+      "code": "A8150",
+      "title": "销售顾问（小工单）-深惠1组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196923114272672037/detail",
+      "updated_at": "2023-02-06 14:20"
+    },
+    {
+      "id": "7196929291106896187",
+      "code": "S0981",
+      "title": "销售顾问（小工单）-温州",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196929291106896187/detail",
+      "updated_at": "2023-02-06 14:42"
+    },
+    {
+      "id": "7196921752295000353",
+      "code": "W8951",
+      "title": "销售顾问（小工单）-苏中",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196921752295000353/detail",
+      "updated_at": "2023-02-06 14:14"
+    },
+    {
+      "id": "7261813285043947837",
+      "code": "A95715",
+      "title": "销售顾问（小工单）-苏州2组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261813285043947837/detail",
+      "updated_at": "2023-07-31 11:08"
+    },
+    {
+      "id": "7196929126438078776",
+      "code": "N3602",
+      "title": "销售顾问（小工单）-金华2组",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7196929126438078776/detail",
+      "updated_at": "2023-02-06 14:42"
+    },
+    {
+      "id": "7261815255046293817",
+      "code": "A127096",
+      "title": "销售顾问（小工单）-金华直销",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7261815255046293817/detail",
+      "updated_at": "2024-08-02 17:34"
+    },
+    {
+      "id": "6980562531854354701",
+      "code": "JGWYP",
+      "title": "销售顾问（小工单）-青岛",
+      "dept": {
+        "zh": "小工单业务线",
+        "en": "小工单业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980562531854354701/detail",
+      "updated_at": "2021-07-03 13:12"
+    },
+    {
+      "id": "6980551871061657892",
+      "code": "KHYP",
+      "title": "业务产品经理-小工单",
+      "dept": {
+        "zh": "小工单产品部",
+        "en": "小工单产品部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980551871061657892/detail",
+      "updated_at": "2025-12-14 11:34"
+    },
+    {
+      "id": "7004334020097493252",
+      "code": "QAM2",
+      "title": "市场-社群运营",
+      "dept": {
+        "zh": "市场部",
+        "en": "市场部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7004334020097493252/detail",
+      "updated_at": "2021-09-05 15:39"
+    },
+    {
+      "id": "6980560701426174221",
+      "code": "JXFYP",
+      "title": "前端工程师-小工单",
+      "dept": {
+        "zh": "技术部",
+        "en": "技术部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980560701426174221/detail",
+      "updated_at": "2024-04-26 15:25"
+    },
+    {
+      "id": "7362820700057291044",
+      "code": "A63878",
+      "title": "智造-JAVA开发工程师（接口）",
+      "dept": {
+        "zh": "数据集成",
+        "en": "数据集成"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7362820700057291044/detail",
+      "updated_at": "2024-04-28 15:45"
+    },
+    {
+      "id": "7538326565924948243",
+      "code": "A230817",
+      "title": "智造-大客户销售",
+      "dept": {
+        "zh": "智造业务线",
+        "en": "智造业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7538326565924948243/detail",
+      "updated_at": "2025-10-16 13:55"
+    },
+    {
+      "id": "7036606629521180940",
+      "code": "J4M2V",
+      "title": "业务产品经理-智造",
+      "dept": {
+        "zh": "智造产品部",
+        "en": "智造产品部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7036606629521180940/detail",
+      "updated_at": "2026-01-26 13:53"
+    },
+    {
+      "id": "7325623151849113882",
+      "code": "A161624",
+      "title": "前端工程师-智造",
+      "dept": {
+        "zh": "智造技术",
+        "en": "智造技术"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7325623151849113882/detail",
+      "updated_at": "2025-10-24 15:37"
+    },
+    {
+      "id": "6984608218564249870",
+      "code": "E2EP",
+      "title": "费用会计",
+      "dept": {
+        "zh": "智造运营部",
+        "en": "智造运营部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6984608218564249870/detail",
+      "updated_at": "2021-07-14 10:48"
+    },
+    {
+      "id": "7010665768849328391",
+      "code": "BDX2",
+      "title": "活动运营专家",
+      "dept": {
+        "zh": "活动运营",
+        "en": "活动运营"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7010665768849328391/detail",
+      "updated_at": "2021-09-22 16:05"
+    },
+    {
+      "id": "6995803086695975199",
+      "code": "JNPS2",
+      "title": "渠道经理-华北",
+      "dept": {
+        "zh": "渠道",
+        "en": "渠道"
+      },
+      "city": [
+        {
+          "zh": "北京",
+          "en": "Beijing"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6995803086695975199/detail",
+      "updated_at": "2021-08-13 14:51"
+    },
+    {
+      "id": "7046669431456811301",
+      "code": "35HV",
+      "title": "渠道经理-山东",
+      "dept": {
+        "zh": "渠道",
+        "en": "渠道"
+      },
+      "city": [
+        {
+          "zh": "济南",
+          "en": "Jinan"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7046669431456811301/detail",
+      "updated_at": "2021-12-28 16:36"
+    },
+    {
+      "id": "7010665240094411044",
+      "code": "JGKX2",
+      "title": "销售拓展代表",
+      "dept": {
+        "zh": "电销一组",
+        "en": "电销一组"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7010665240094411044/detail",
+      "updated_at": "2021-09-22 16:08"
+    },
+    {
+      "id": "7116400783629273358",
+      "code": "L7242",
+      "title": "销售管培生-华南",
+      "dept": {
+        "zh": "直销",
+        "en": "直销"
+      },
+      "city": [
+        {
+          "zh": "深圳",
+          "en": "Shenzhen"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7116400783629273358/detail",
+      "updated_at": "2022-07-04 14:32"
+    },
+    {
+      "id": "6980551415454583043",
+      "code": "XDYP",
+      "title": "解决方案经理-华东",
+      "dept": {
+        "zh": "解决方案",
+        "en": "解决方案"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980551415454583043/detail",
+      "updated_at": "2021-07-03 12:32"
+    },
+    {
+      "id": "6980556712211564807",
+      "code": "JMMYP",
+      "title": "用户体验设计师-UE/UX",
+      "dept": {
+        "zh": "设计部",
+        "en": "设计部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980556712211564807/detail",
+      "updated_at": "2025-12-14 11:28"
+    },
+    {
+      "id": "7122732933849401637",
+      "code": "E4228",
+      "title": "采购经理",
+      "dept": {
+        "zh": "财务部",
+        "en": "财务部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7122732933849401637/detail",
+      "updated_at": "2022-07-21 16:02"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-/* global React, window, IMPACT_SHOTS, QUESTIONS, JOB_NODES, SYSTEM_FLOW, JOBS, CATEGORIES, RECRUIT_URL */
+/* global React, window, IMPACT_SHOTS, QUESTIONS, SYSTEM_FLOW, RECRUIT_URL */
 // ============ Blacklake Careers v6 · 场景（流动的工厂） ============
 
 // ═══════════ 00–01 Hero：绿灯点火 → 信号收拢 → 伺服电机装配 → 上滑拆解 ═══════════
@@ -502,11 +502,24 @@ function Frontier({ active, leaving, onHire }) {
 }
 
 // ═══════════ 07 Jobs：你想进入哪一段 ═══════════
-function JobsScene({ active, leaving, onNode }) {
+// ═══════════ 07 Jobs：全量镜像飞书招聘（jobs.json 每日同步） ═══════════
+function deptStats(jobs, useEn) {
+  const map = {};
+  jobs.forEach((j) => {
+    const d = (useEn && j.dept && j.dept.en) || (j.dept && j.dept.zh) || "其他";
+    map[d] = (map[d] || 0) + 1;
+  });
+  return Object.entries(map)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+function JobsScene({ active, leaving, onNode, jobs }) {
+  const nodes = deptStats(jobs).slice(0, 8);
   return (
     <section className={`scene jobs-scene ${active ? "is-active" : ""} ${leaving ? "leaving" : ""}`} aria-hidden={!active}>
       <header className="jobs-head">
-        <p>JOBS / FIND WHERE YOU FIT</p>
+        <p>JOBS / LIVE FROM FEISHU HIRE</p>
         <h2>这个系统里，<span>哪一部分是你想参与构建的？</span></h2>
       </header>
       <div className="sysflow" aria-hidden="true">
@@ -518,20 +531,16 @@ function JobsScene({ active, leaving, onNode }) {
         ))}
       </div>
       <div className="job-nodes">
-        {JOB_NODES.map((n) => {
-          const count = JOBS.filter((j) => j.category === n.cat).length;
-          return (
-            <button className="job-node" key={n.cat} onClick={() => onNode(n.cat)}>
-              <span className="jn-en">{n.en}</span>
-              <span className="jn-cat">{n.cat}</span>
-              <span className="jn-note">{n.note}</span>
-              <span className="jn-meta">
-                <span className="jn-count">{count} 个开放岗位</span>
-                <span className="jn-go">进入 ↗</span>
-              </span>
-            </button>
-          );
-        })}
+        {nodes.map((n) => (
+          <button className="job-node" key={n.name} onClick={() => onNode(n.name)}>
+            <span className="jn-en">{String(n.count).padStart(2, "0")} OPEN</span>
+            <span className="jn-cat">{n.name}</span>
+            <span className="jn-meta">
+              <span className="jn-count">{n.count} 个开放岗位</span>
+              <span className="jn-go">进入 ↗</span>
+            </span>
+          </button>
+        ))}
       </div>
       <div className="jobs-foot">
         <a href="mailto:careers@blacklake.cn">careers@blacklake.cn →</a>
@@ -541,11 +550,24 @@ function JobsScene({ active, leaving, onNode }) {
   );
 }
 
-// ═══════════ 职位抽屉：纸的反转，30 秒可投递 ═══════════
-function JobsDrawer({ open, filter, onFilter, onClose }) {
-  const counts = {};
-  JOBS.forEach((j) => { counts[j.category] = (counts[j.category] || 0) + 1; });
-  const list = filter === "全部" ? JOBS : JOBS.filter((j) => j.category === filter);
+// ═══════════ 职位抽屉：全量在招列表，纸的反转，30 秒可投递 ═══════════
+function JobsDrawer({ open, filter, onFilter, onClose, jobs }) {
+  const TOP_N = 8;
+  const [city, setCity] = useS("全部城市");
+  const depts = deptStats(jobs);
+  const top = depts.slice(0, TOP_N);
+  const topNames = new Set(top.map((d) => d.name));
+  const otherCount = depts.slice(TOP_N).reduce((s, d) => s + d.count, 0);
+  const cities = [];
+  jobs.forEach((j) => (j.city || []).forEach((c) => {
+    if (c.zh && !cities.some((x) => x.zh === c.zh)) cities.push(c);
+  }));
+  cities.sort((a, b) => (a.zh > b.zh ? 1 : -1));
+  const deptOk = (j) =>
+    !filter || filter === "全部" ||
+    (filter === "其他" ? !topNames.has(j.dept.zh) : j.dept.zh === filter);
+  const cityOk = (j) => city === "全部城市" || (j.city || []).some((c) => c.zh === city);
+  const list = jobs.filter((j) => deptOk(j) && cityOk(j));
   return (
     <React.Fragment>
       <button className={`drawer-backdrop ${open ? "open" : ""}`} onClick={onClose} aria-label="关闭职位列表" tabIndex={-1} />
@@ -557,29 +579,43 @@ function JobsDrawer({ open, filter, onFilter, onClose }) {
           </div>
           <button className="drawer-close" onClick={onClose}>关闭 ×</button>
         </div>
-        <p className="drawer-intro">到真实的制造现场，解决 AI 还没有答案的问题。点击岗位，前往飞书招聘完成投递。</p>
+        <p className="drawer-intro">全部在招职位，与飞书招聘官网每日同步。点击岗位，前往飞书招聘完成投递。</p>
         <div className="drawer-filters">
           <button className={filter === "全部" ? "selected" : ""} onClick={() => onFilter("全部")}>
-            全部 {JOBS.length}
+            全部 {jobs.length}
           </button>
-          {CATEGORIES.map((c) => (
-            <button key={c} className={filter === c ? "selected" : ""} onClick={() => onFilter(c)}>
-              {c} {counts[c] || 0}
+          {top.map((d) => (
+            <button key={d.name} className={filter === d.name ? "selected" : ""} onClick={() => onFilter(d.name)}>
+              {d.name} {d.count}
             </button>
           ))}
+          {otherCount > 0 && (
+            <button className={filter === "其他" ? "selected" : ""} onClick={() => onFilter("其他")}>
+              其他 {otherCount}
+            </button>
+          )}
+          <select className="city-select" value={city} onChange={(e) => setCity(e.target.value)} aria-label="按城市筛选">
+            <option value="全部城市">全部城市</option>
+            {cities.map((c) => (
+              <option key={c.zh} value={c.zh}>{c.zh}{c.en && c.en !== c.zh ? ` · ${c.en}` : ""}</option>
+            ))}
+          </select>
         </div>
         <div className="drawer-list">
           {list.map((j, i) => (
-            <a className="djob" key={j.id} href={j.applyUrl || RECRUIT_URL} target="_blank" rel="noreferrer">
+            <a className="djob compact" key={j.id} href={j.url || RECRUIT_URL} target="_blank" rel="noreferrer">
               <span className="djob-no">{String(i + 1).padStart(2, "0")}</span>
               <span className="djob-copy">
                 <strong>{j.title}</strong>
-                <small>{j.loc} · {j.category} · {j.type} · {j.level}</small>
-                <p>{j.desc}</p>
+                <small>
+                  {j.dept.zh}
+                  {j.city && j.city.length ? " · " + j.city.map((c) => c.zh).join(" / ") : ""}
+                </small>
               </span>
               <span className="djob-arrow">↗</span>
             </a>
           ))}
+          {list.length === 0 && <p className="drawer-empty">该筛选下暂无在招岗位</p>}
         </div>
         <p className="drawer-foot">投递入口接入飞书招聘 · 简历直达用人团队</p>
       </aside>
