@@ -20,12 +20,21 @@ python3 scripts/sync_jobs.py --lark-cli   # 用本机 lark-cli 登录态
 git add jobs.json && git commit -m "sync: 刷新在招职位" && git push
 ```
 
-## GitLab 定时流水线（全自动，一次性配置）
+## 当前生效：本机每日定时任务（LaunchAgent）
 
-`.gitlab-ci.yml` 里的 `sync-jobs` job 只在 **scheduled pipeline** 触发时运行：
-拉取最新职位 → 有变化则自动 commit 并 push 回仓库。
+已配置 macOS LaunchAgent（`~/Library/LaunchAgents/cn.blacklake.careers.sync.plist`）：
+**每天 08:30** 自动运行 `scripts/sync_and_push.sh`（睡眠错过会在唤醒后补跑）：
+拉取飞书职位 → jobs.json 有变化才提交 → 同时推 GitHub（Pages 立即刷新）+ GitLab（自动触发 deploy-test）。
 
-启用步骤（项目所有人在 GitLab 页面上操作，约 3 分钟）：
+- 日志：`~/Library/Logs/blacklake-careers-sync.log`
+- 手动跑一次：`launchctl kickstart gui/$(id -u)/cn.blacklake.careers.sync`
+- 停用：`launchctl unload ~/Library/LaunchAgents/cn.blacklake.careers.sync.plist`
+- 脚本同步失败会原样退出并记日志；GitLab 若因远端新提交推送失败，下次运行前手动 `git pull --rebase` 一次即可
+
+## GitLab 定时流水线（备用，站点迁入公司基建后再启用）
+
+`.gitlab-ci.yml` 里的 `sync-jobs` job 已就绪，只做定时同步。等官网正式部署到公司服务器后，
+把调度权交给 GitLab（本机 LaunchAgent 停用），启用步骤：
 
 1. **配凭据**：项目 → Settings → CI/CD → Variables，添加（均勾 Masked）：
    - `FEISHU_APP_ID` / `FEISHU_APP_SECRET`：自建应用凭证（需已开通 scope
