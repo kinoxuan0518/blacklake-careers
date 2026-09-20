@@ -1,6 +1,11 @@
 # 部署说明（DEPLOY）
 
-黑湖科技招聘官网 —— 纯静态站，无构建步骤、无运行时依赖、无外部 CDN 请求。
+> **2026-09-20 起站点换代**：由 React 18 + Babel standalone 旧版，切换为 **Vite 构建版**
+> （源码：`/Users/kino/New CC/app`，构建产物即本仓库根目录的 `index.html` + `assets/`）。
+> 职位数据链路不变：仍由 `jobs.json`（飞书招聘每日同步）驱动，站点运行时 `fetch("jobs.json")` 渲染，
+> 每岗投递链接指向飞书招聘官方详情页。以下部署方式说明继续适用。
+
+黑湖科技招聘官网 —— 纯静态站，无运行时依赖、无外部 CDN 请求。
 本文件面向运维/前端基建同学，描述把本站挂到公司服务器（careers.blacklake.cn 或 www.blacklake.cn/careers）所需的一切。
 
 ## 1. 站点形态
