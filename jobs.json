@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-30 20:23",
+  "generated_at": "2026-10-08 15:58",
   "website_id": "6976825782060747038",
   "website_name": "社招官网",
-  "count": 58,
+  "count": 57,
   "jobs": [
     {
       "id": "7041460866340325663",
@@ -296,7 +296,7 @@
         }
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/6980549762160970020/detail",
-      "updated_at": "2025-12-30 12:31"
+      "updated_at": "2026-10-08 15:58"
     },
     {
       "id": "6980554777688148257",
@@ -948,27 +948,6 @@
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/6980560701426174221/detail",
       "updated_at": "2024-04-26 16:25"
-    },
-    {
-      "id": "7362820700057291044",
-      "code": "A63878",
-      "title": "智造-JAVA开发工程师（接口）",
-      "cat": {
-        "zh": "技术",
-        "en": "Technology"
-      },
-      "dept": {
-        "zh": "数据集成",
-        "en": "数据集成"
-      },
-      "city": [
-        {
-          "zh": "上海",
-          "en": "Shanghai"
-        }
-      ],
-      "url": "https://blacklake.jobs.feishu.cn/index/position/7362820700057291044/detail",
-      "updated_at": "2024-04-28 16:45"
     },
     {
       "id": "7538326565924948243",
