@@ -5,6 +5,27 @@
   "count": 57,
   "jobs": [
     {
+      "id": "7635659281920674075",
+      "code": "A229851",
+      "title": "Agent 产品经理- CAD",
+      "cat": {
+        "zh": "产品",
+        "en": "Product"
+      },
+      "dept": {
+        "zh": "Cats&Dogs",
+        "en": "Cats&Dogs"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7635659281920674075/detail",
+      "updated_at": "2026-06-09 11:23"
+    },
+    {
       "id": "7041460866340325663",
       "code": "KSSV",
       "title": "渠道经理",
@@ -66,27 +87,6 @@
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/7272941613923567933/detail",
       "updated_at": "2026-06-30 20:23"
-    },
-    {
-      "id": "6976884948238944516",
-      "code": "9NBP",
-      "title": "HRG",
-      "cat": {
-        "zh": "职能",
-        "en": "Corporate Functions"
-      },
-      "dept": {
-        "zh": "人才发展部",
-        "en": "人才发展部"
-      },
-      "city": [
-        {
-          "zh": "上海",
-          "en": "Shanghai"
-        }
-      ],
-      "url": "https://blacklake.jobs.feishu.cn/index/position/6976884948238944516/detail",
-      "updated_at": "2021-06-23 16:19"
     },
     {
       "id": "6980515576646011166",
@@ -929,9 +929,9 @@
       "updated_at": "2021-09-05 16:39"
     },
     {
-      "id": "6980560701426174221",
-      "code": "JXFYP",
-      "title": "前端工程师-小工单",
+      "id": "7650329613550127423",
+      "code": "A109117",
+      "title": "AI 原生协作平台工程师/AI全栈架构型工程师",
       "cat": {
         "zh": "技术",
         "en": "Technology"
@@ -946,8 +946,29 @@
           "en": "Shanghai"
         }
       ],
-      "url": "https://blacklake.jobs.feishu.cn/index/position/6980560701426174221/detail",
-      "updated_at": "2024-04-26 16:25"
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7650329613550127423/detail",
+      "updated_at": "2026-09-16 16:59"
+    },
+    {
+      "id": "7686037114991855908",
+      "code": "A199369",
+      "title": "AI 产品解决方案专家",
+      "cat": {
+        "zh": "技术",
+        "en": "Technology"
+      },
+      "dept": {
+        "zh": "智造业务线",
+        "en": "智造业务线"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7686037114991855908/detail",
+      "updated_at": "2026-09-16 16:51"
     },
     {
       "id": "7538326565924948243",
@@ -971,6 +992,27 @@
       "updated_at": "2025-10-16 14:55"
     },
     {
+      "id": "7583998444160649523",
+      "code": "A218058",
+      "title": "Agent 产品经理-智造",
+      "cat": {
+        "zh": "产品",
+        "en": "Product"
+      },
+      "dept": {
+        "zh": "智造产品部",
+        "en": "智造产品部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/7583998444160649523/detail",
+      "updated_at": "2026-05-03 22:40"
+    },
+    {
       "id": "7036606629521180940",
       "code": "J4M2V",
       "title": "业务产品经理-智造",
@@ -990,27 +1032,6 @@
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/7036606629521180940/detail",
       "updated_at": "2026-01-26 14:53"
-    },
-    {
-      "id": "7325623151849113882",
-      "code": "A161624",
-      "title": "前端工程师-智造",
-      "cat": {
-        "zh": "技术",
-        "en": "Technology"
-      },
-      "dept": {
-        "zh": "智造技术",
-        "en": "智造技术"
-      },
-      "city": [
-        {
-          "zh": "上海",
-          "en": "Shanghai"
-        }
-      ],
-      "url": "https://blacklake.jobs.feishu.cn/index/position/7325623151849113882/detail",
-      "updated_at": "2025-10-24 16:37"
     },
     {
       "id": "6984608218564249870",
@@ -1158,27 +1179,6 @@
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/6980551415454583043/detail",
       "updated_at": "2021-07-03 13:32"
-    },
-    {
-      "id": "6980556712211564807",
-      "code": "JMMYP",
-      "title": "用户体验设计师-UE/UX",
-      "cat": {
-        "zh": "设计",
-        "en": "Design"
-      },
-      "dept": {
-        "zh": "设计部",
-        "en": "设计部"
-      },
-      "city": [
-        {
-          "zh": "上海",
-          "en": "Shanghai"
-        }
-      ],
-      "url": "https://blacklake.jobs.feishu.cn/index/position/6980556712211564807/detail",
-      "updated_at": "2025-12-14 12:28"
     },
     {
       "id": "7122732933849401637",
