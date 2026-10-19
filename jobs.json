@@ -2,7 +2,7 @@
   "generated_at": "2026-10-08 15:58",
   "website_id": "6976825782060747038",
   "website_name": "社招官网",
-  "count": 57,
+  "count": 58,
   "jobs": [
     {
       "id": "7635659281920674075",
@@ -318,6 +318,27 @@
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/6980554777688148257/detail",
       "updated_at": "2021-07-03 13:38"
+    },
+    {
+      "id": "6980566118965610765",
+      "code": "7RYP",
+      "title": "客户成功经理-智造",
+      "cat": {
+        "zh": "客户成功",
+        "en": "Customer Success"
+      },
+      "dept": {
+        "zh": "客户成功部",
+        "en": "客户成功部"
+      },
+      "city": [
+        {
+          "zh": "上海",
+          "en": "Shanghai"
+        }
+      ],
+      "url": "https://blacklake.jobs.feishu.cn/index/position/6980566118965610765/detail",
+      "updated_at": "2026-07-03 11:58"
     },
     {
       "id": "6980549762748287239",
