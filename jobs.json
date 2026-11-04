@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-27 14:11",
+  "generated_at": "2026-11-03 16:01",
   "website_id": "6976825782060747038",
   "website_name": "社招官网",
-  "count": 58,
+  "count": 57,
   "jobs": [
     {
       "id": "7635659281920674075",
@@ -511,7 +511,7 @@
     {
       "id": "7196923671947036986",
       "code": "C7999",
-      "title": "销售顾问（小工单）-东莞1组",
+      "title": "销售顾问（小工单）-东莞",
       "cat": {
         "zh": "销售",
         "en": "Sales"
@@ -527,28 +527,7 @@
         }
       ],
       "url": "https://blacklake.jobs.feishu.cn/index/position/7196923671947036986/detail",
-      "updated_at": "2023-02-06 14:20"
-    },
-    {
-      "id": "7261815570243455269",
-      "code": "A10752",
-      "title": "销售顾问（小工单）-东莞2组",
-      "cat": {
-        "zh": "销售",
-        "en": "Sales"
-      },
-      "dept": {
-        "zh": "小工单业务线",
-        "en": "小工单业务线"
-      },
-      "city": [
-        {
-          "zh": "上海",
-          "en": "Shanghai"
-        }
-      ],
-      "url": "https://blacklake.jobs.feishu.cn/index/position/7261815570243455269/detail",
-      "updated_at": "2023-07-31 11:15"
+      "updated_at": "2026-11-03 16:01"
     },
     {
       "id": "7196923816668154171",
