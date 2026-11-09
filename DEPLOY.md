@@ -1,141 +1,62 @@
 # 部署说明（DEPLOY）
 
-> **2026-09-20 起站点换代**：由 React 18 + Babel standalone 旧版，切换为 **Vite 构建版**
-> （源码：`/Users/kino/New CC/app`，构建产物即本仓库根目录的 `index.html` + `assets/`）。
-> 职位数据链路不变：仍由 `jobs.json`（飞书招聘每日同步）驱动，站点运行时 `fetch("jobs.json")` 渲染，
-> 每岗投递链接指向飞书招聘官方详情页。以下部署方式说明继续适用。
-
-黑湖科技招聘官网 —— 纯静态站，无运行时依赖、无外部 CDN 请求。
-本文件面向运维/前端基建同学，描述把本站挂到公司服务器（careers.blacklake.cn 或 www.blacklake.cn/careers）所需的一切。
+> **2026-11-09 起**：站点为 **Vite + React 构建的纯静态站**（旧 React 18 + Babel standalone 版已移除）。
+> 本仓库根目录的 `index.html` + `assets/` + `fonts/` 等即构建产物，由运维脚本原样同步到服务器目录。
+> 职位数据链路不变：`jobs.json`（飞书招聘每日同步）驱动，站点运行时 `fetch("jobs.json")` 渲染。
 
 ## 1. 站点形态
 
-- 入口：`index.html`（中文版）、`index-en.html`（英文版），两个独立 HTML，互链切换
-- 技术栈：React 18 + Babel standalone，全部内置在 `lib/` 本地目录，浏览器端直接加载，**不需要 npm install、不需要 build**
-- 所有资源（JS 库 / 字体 / 图片 / 样式）均为**本地相对路径**，无任何外部 CDN / Google Fonts 请求
-- 因为全是相对路径，部署在**根域名或任意子路径**下都不需要改代码
+- 入口：`index.html`（中文，页内可切换英文）
+- 技术栈：Vite + React 19，构建后无运行时依赖、无外部 CDN 请求
+- 资源均为相对路径（`./assets/…`、`../fonts/…`），可部署在根域名或任意子路径
 
-## 2. 文件清单
+## 2. 构建设置
 
-部署必需（原样拷贝即可）：
+| 项 | 值 |
+|---|---|
+| 源码仓库 | `/Users/kino/blacklake-careers-v3`（本地，无远端） |
+| 发布分支 | `redesign/all-roles`（构建工作区 `.claude/worktrees/site`） |
+| 构建命令 | `cd <源码目录> && npm run build` → 产物在 `dist/` |
+| 构建产物 | `index.html`、`assets/`、`fonts/`、`favicon*`、`apple-touch-icon.png` |
 
-```
-index.html          中文版入口
-index-en.html       英文版入口
-styles.css          全站样式
-app.jsx             应用入口与场景调度（中）
-app-en.jsx          应用入口与场景调度（英）
-components.jsx      公共组件（中英共用）
-sections.jsx        场景组件（中）
-sections-en.jsx     场景组件（英）
-data.jsx            内容与职位数据（中）
-data-en.jsx         内容与职位数据（英）
-fog.js              Hero 背景动效
-logo.png            顶栏品牌 Logo
-lib/                react.min.js / react-dom.min.js / babel.min.js（本地化三方库）
-assets/             图片与字体（fonts/ 为本地 woff2：Geist Mono + Sarasa Mono SC）
+### 同步到本仓库
+
+```bash
+rsync -a --delete \
+  --exclude '.git' --exclude '.gitignore' --exclude '.DS_Store' \
+  --exclude '.gitlab-ci.yml' --exclude 'DEPLOY.md' --exclude 'SYNC.md' \
+  --exclude 'scripts' --exclude 'jobs.json' \
+  <源码目录>/dist/ ./
 ```
 
-不需要部署（开发痕迹，留在仓库里不影响运行）：
+> `jobs.json` 不随站点构建同步（dist 里的是构建时快照），本仓库的 `jobs.json` 由每日同步脚本维护，见 `SYNC.md`。
 
-```
-proto-*.html        历史设计原型
-_screens/           验证截图
-serve.mjs           本地预览小服务器（仅开发用：node serve.mjs）
-package.json        仅声明 dev 脚本，无依赖
-```
+## 3. 环境与发布
 
-## 3. 部署方式
+| 环境 | 访问范围 | 域名 |
+|---|---|---|
+| 测试 | 内网（先连**飞连**） | https://job-test.blacklake.tech |
+| 生产 | 外网 | https://job.blacklake.cn |
+| GitHub Pages 镜像 | 外网 | https://kinoxuan0518.github.io/blacklake-careers/ |
 
-### 3.1 独立域名 careers.blacklake.cn（首选）
+发布流程（`.gitlab-ci.yml`）：
 
-任意静态文件服务器指向本目录即可。Nginx 示例：
+1. `git push gitlab main` → **测试站自动发布**（`deploy-test`，执行 `/root/job-update-test.sh`）
+2. 生产站**手动发布**：打开流水线页面 → 最新流水线 → `deploy-prod` 点 ▶ 运行（执行 `/root/job-update-prod.sh`）
+   - 流水线：https://gitlab.blacklake.tech/xuanzhenglong/blacklake-careers/-/pipelines
+3. 推送 `origin`（GitHub）会同步更新 GitHub Pages 镜像（子路径 `/blacklake-careers/` 访问）
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name careers.blacklake.cn;
+## 4. 验证清单（每次发版）
 
-    # ssl_certificate / ssl_certificate_key 按公司证书配置
+1. 生产/测试站 `index.html` 引用的构建哈希与本地 `dist/index.html` 一致
+2. 全部资源 200：`assets/index-*.js`、`assets/index-*.css`、`fonts/bl-serif-*.woff2`、`assets/og-card.png`、`jobs.json`
+3. 旧构建文件返回 404（整目录替换，无残留）
+4. 页面内：职位数 = `jobs.json` 的 `count`；中英切换正常；投递链接指向飞书招聘官方详情页
+5. 桌面 1440 与手机 390 宽无横向溢出、控制台 0 报错
+6. 若浏览器仍是旧版：⌘⇧R 强制刷新（HTML 走 ETag/Last-Modified 校验）
 
-    root /var/www/blacklake-careers;   # 本仓库内容
-    index index.html;
+## 5. 已知边界
 
-    location / {
-        try_files $uri $uri/ =404;
-    }
-
-    # HTML 不缓存（入口带 ?v= 版本号控制静态资源）
-    location ~* \.html$ {
-        add_header Cache-Control "no-cache";
-    }
-
-    # 字体/图片/库文件长缓存（内容变更靠 index.html 里的 ?v= 版本号刷新）
-    location ~* \.(woff2|jpg|png|css)$ {
-        expires 7d;
-    }
-    location /lib/ {
-        expires 30d;
-    }
-}
-```
-
-### 3.2 子路径 www.blacklake.cn/careers（备选）
-
-```nginx
-location /careers/ {
-    alias /var/www/blacklake-careers/;
-    index index.html;
-}
-```
-
-全站资源均为相对路径，子路径下可直接工作，无需改代码。
-（已于 2026-09-02 本地模拟子路径实测：中英双版序章完播 `8/8 · OK`、零外部请求、零 JS 报错。）
-注意：`alias` 末尾的 `/` 必须保留。
-
-## 4. GitLab CI 自动发布（示例）
-
-纯静态站的最简流水线——push 到 main 即同步到服务器目录：
-
-```yaml
-# .gitlab-ci.yml（示例，按公司基建实际调整 runner / 目标机）
-deploy:
-  stage: deploy
-  only:
-    - main
-  script:
-    - rsync -av --delete
-        --exclude '.git' --exclude '_screens' --exclude 'proto-*.html'
-        --exclude 'serve.mjs' --exclude 'package.json'
-        ./ /var/www/blacklake-careers/
-```
-
-如果公司已有 v1 的流水线规范（测试自动 / 生产手动），直接复用即可，本站对流水线无任何特殊要求。
-
-## 5. 版本号约定
-
-`index.html` / `index-en.html` 中通过 query 版本号做缓存刷新：
-
-```
-styles.css?v=12
-data.jsx / components.jsx / sections.jsx / app.jsx ?v=23
-```
-
-**每次修改 css 或 jsx 后，手动 bump 两个 HTML 里对应的 `?v=` 数字**，否则客户端可能读到旧缓存。
-
-## 6. 内容维护
-
-- 职位列表 / JD：编辑 `data.jsx`（中）与 `data-en.jsx`（英）中的 `JOBS` 数组，提交发版即生效
-- 9 个职位的飞书招聘投递链接（applyUrl）待 HR 提供后填入（当前为占位）
-- 若后续接入公司 CMS 自维护，再议（需 CMS 侧确认支持）
-
-## 7. 验证清单（发版后）
-
-1. 打开首页，Hero 序章动画完播后 HUD 显示 `8/8 · OK`
-2. 切换英文版 `index-en.html` 正常
-3. 浏览器 DevTools → Network：全部请求均为本站域名，**无 unpkg / Google Fonts 等外部请求**
-4. 职位卡片点击展开正常
-
----
-
-临时预览（GitHub Pages）：https://kinoxuan0518.github.io/blacklake-careers/
+- `src/pages/Home.tsx` 中 logo 使用根绝对路径 `/assets/logo-blacklake.png`：正式站（根域名）正常；GitHub Pages 子路径镜像下该图不显示
+- 首页底部「在招职位」为精选 6 个岗位；完整 57 个在「你想做什么?」检索弹窗（导航「在招职位 57」或底部按钮打开）——产品设计如此，非数据缺失
+- 职位数据无薪酬/JD 描述，详情与投递在飞书官方页完成
